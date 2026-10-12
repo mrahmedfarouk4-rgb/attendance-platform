@@ -10,7 +10,11 @@
     font-family: var(--font-sans);
   }
   body {
-    background-color: #f7f7f7;
+    background-color: #f4f5f3;
+    background-image: linear-gradient(rgba(244, 245, 243, 0.94), rgba(244, 245, 243, 0.97)), url(/hero-bg.jpg);
+    background-size: cover;
+    background-position: center top;
+    background-attachment: fixed;
     min-height: 100vh;
   }
 }
@@ -21,6 +25,11 @@
 }
 .animate-fade-up {
   animation: fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* شريط لوني بلون المسار على أول خلية في صفوف الكشف */
+.att-row td:first-child {
+  border-right: 4px solid var(--track, #621244);
 }
 
 ::-webkit-scrollbar { width: 8px; height: 8px; }
@@ -107,7 +116,7 @@
     position: static !important;
   }
   table.att-table thead th {
-    background: #004645 !important;
+    background: var(--track, #621244) !important;
     color: #fff !important;
     border-left: 1px solid #013937 !important;
     border-bottom: 2px solid #fbe122 !important;
@@ -121,9 +130,12 @@
     padding: 5px 4px !important;
   }
   table.att-table tbody tr:nth-child(even) td {
-    background: #f8fafc !important;
+    background: color-mix(in srgb, var(--track, #621244) 7%, white) !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+  }
+  table.att-table tbody tr td:first-child {
+    border-right: 4px solid var(--track, #621244) !important;
   }
   .print-avatar {
     -webkit-print-color-adjust: exact !important;
@@ -133,7 +145,7 @@
     font-size: 15px !important;
   }
   table.att-table .print-mark.print-p {
-    color: #004645 !important;
+    color: #262674 !important;
   }
   table.att-table .print-mark.print-a {
     color: #621244 !important;
