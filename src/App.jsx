@@ -64,18 +64,18 @@ const shortDM = (iso) => { const [, m, d] = String(iso).split('-'); return `${pa
 
 const statusLabel = { present: 'حاضر', absent: 'غائب', late: 'متأخر', excused: 'مستأذن' };
 const trackStyle = {
-  visual: { chip: 'bg-indigo-50 text-indigo-900 border-indigo-200', bar: 'bg-indigo-800', icon: <Palette className="w-5 h-5" /> },
-  performing: { chip: 'bg-rose-50 text-rose-900 border-rose-200', bar: 'bg-rose-800', icon: <Drama className="w-5 h-5" /> },
-  music: { chip: 'bg-teal-50 text-teal-900 border-teal-200', bar: 'bg-teal-800', icon: <Music4 className="w-5 h-5" /> },
+  visual: { chip: 'bg-[#c6eee5] text-[#004645] border-[#83d5c4]', icon: <Palette className="w-5 h-5" /> },
+  performing: { chip: 'bg-[#f5d7e8] text-[#621244] border-[#e5a1c8]', icon: <Drama className="w-5 h-5" /> },
+  music: { chip: 'bg-[#c0e1f7] text-[#262674] border-[#83c3eb]', icon: <Music4 className="w-5 h-5" /> },
 };
 const roleStyle = {
-  admin: 'bg-amber-100 text-amber-900 border border-amber-300',
-  supervisor: 'bg-indigo-100 text-indigo-900 border border-indigo-300',
-  teacher: 'bg-teal-100 text-teal-900 border border-teal-300',
-  developer: 'bg-slate-900 text-amber-400 border border-amber-400',
+  admin: 'bg-[#fddcc8] text-[#7a3c12] border border-[#d17e30]',
+  supervisor: 'bg-[#c0e1f7] text-[#262674] border border-[#83c3eb]',
+  teacher: 'bg-[#c6eee5] text-[#004645] border border-[#83d5c4]',
+  developer: 'bg-[#004645] text-[#fbe122] border border-[#fbe122]',
 };
 const roleLabel = { admin: 'مدير', supervisor: 'مشرف', teacher: 'معلم', developer: 'مطور المنصة' };
-const avatarTones = ['bg-slate-200 text-slate-700', 'bg-indigo-100 text-indigo-800', 'bg-teal-100 text-teal-800', 'bg-amber-100 text-amber-800', 'bg-rose-100 text-rose-800'];
+const avatarTones = ['bg-[#c6eee5] text-[#004645]', 'bg-[#f5d7e8] text-[#621244]', 'bg-[#c0e1f7] text-[#262674]', 'bg-[#fddcc8] text-[#7a3c12]', 'bg-[#fbe122] text-[#621244]'];
 
 // استخراج الأسماء من ملف عام: JSON (مصفوفة أو كائن) أو CSV/TXT (سطر لكل اسم)
 function parseNamesFile(text) {
@@ -110,24 +110,25 @@ function Login({ onDone }) {
     finally { setLoading(false); }
   };
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 md:p-8 bg-slate-200">
+    <div className="min-h-screen flex items-center justify-center p-4 md:p-8 bg-[#e9efec]">
       <div className="w-full max-w-5xl grid md:grid-cols-5 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-fade-up">
-        <div className="hidden md:flex md:col-span-2 flex-col justify-between p-10 text-white bg-slate-900 relative overflow-hidden">
-          <div className="absolute -top-24 -left-24 w-72 h-72 rounded-full bg-amber-400/10 blur-2xl" />
-          <div className="absolute -bottom-28 -right-20 w-80 h-80 rounded-full bg-indigo-500/15 blur-2xl" />
+        <div className="hidden md:flex md:col-span-2 flex-col justify-between p-10 text-white bg-[#004645] relative overflow-hidden">
+          <div className="absolute -top-24 -left-24 w-72 h-72 rounded-full bg-[#fbe122]/10 blur-2xl" />
+          <div className="absolute -bottom-28 -right-20 w-80 h-80 rounded-full bg-[#83c3eb]/15 blur-2xl" />
           <div className="relative">
             <div className="flex items-center gap-2">
-              <span className="p-2 bg-amber-400 rounded-lg"><Building2 className="w-5 h-5 text-slate-900" /></span>
-              <span className="text-amber-400 text-xs font-black tracking-wide">منظومة الحضور والغياب</span>
+              <span className="p-2 bg-[#fbe122] rounded-lg"><Building2 className="w-5 h-5 text-[#004645]" /></span>
+              <span className="text-[#fbe122] text-xs font-black tracking-wide">منظومة الحضور والغياب</span>
             </div>
             <h1 className="text-4xl font-black mt-6 leading-tight">التربية<br />الفنية</h1>
-            <div className="w-20 h-1 bg-amber-400 rounded mt-4" />
+            <p className="text-[#c6eee5] text-xs font-bold mt-3">أكاديمية آفاق للفنون والثقافة</p>
+            <div className="w-20 h-1 bg-[#fbe122] rounded mt-4" />
             <p className="text-slate-300 text-sm font-bold mt-4">الفنون البصرية — الأدائية — الموسيقى</p>
           </div>
           <div className="relative space-y-4 mt-10">
             {[['01', 'الفنون البصرية'], ['02', 'الفنون الأدائية'], ['03', 'الموسيقى']].map(([n, t]) => (
               <div key={t} className="flex items-center gap-4">
-                <span className="font-mono text-amber-400/80 text-xs font-bold" dir="ltr">{n}</span>
+                <span className="font-mono text-[#fbe122]/80 text-xs font-bold" dir="ltr">{n}</span>
                 <span className="font-black text-base">{t}</span>
                 <span className="flex-1 h-px bg-white/10" />
               </div>
@@ -144,21 +145,21 @@ function Login({ onDone }) {
           <div>
             <label className="text-xs font-black text-slate-600">اسم المستخدم</label>
             <div className="relative mt-1.5">
-              <input value={username} onChange={e => setUsername(e.target.value)} autoFocus dir="ltr" className="w-full border border-slate-300 rounded-xl pl-11 pr-4 py-3.5 font-bold outline-none focus:border-slate-900 focus:ring-4 focus:ring-slate-100 transition text-left" />
+              <input value={username} onChange={e => setUsername(e.target.value)} autoFocus dir="ltr" className="w-full border border-slate-300 rounded-xl pl-11 pr-4 py-3.5 font-bold outline-none focus:border-[#004645] focus:ring-4 focus:ring-slate-100 transition text-left" />
               <UserRound className="w-5 h-5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             </div>
           </div>
           <div>
             <label className="text-xs font-black text-slate-600">كلمة المرور</label>
             <div className="relative mt-1.5">
-              <input value={password} onChange={e => setPassword(e.target.value)} type={showPw ? 'text' : 'password'} dir="ltr" className="w-full border border-slate-300 rounded-xl pl-20 pr-11 py-3.5 font-bold outline-none focus:border-slate-900 focus:ring-4 focus:ring-slate-100 transition text-left" />
+              <input value={password} onChange={e => setPassword(e.target.value)} type={showPw ? 'text' : 'password'} dir="ltr" className="w-full border border-slate-300 rounded-xl pl-20 pr-11 py-3.5 font-bold outline-none focus:border-[#004645] focus:ring-4 focus:ring-slate-100 transition text-left" />
               <LockKeyhole className="w-5 h-5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <button type="button" onClick={() => setShowPw(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition" title={showPw ? 'إخفاء' : 'إظهار'}>
                 {showPw ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
             </div>
           </div>
-          <button disabled={loading} className="w-full py-4 rounded-xl bg-slate-900 text-white font-black text-base hover:bg-slate-800 active:scale-[0.99] transition disabled:opacity-50 shadow-lg">{loading ? 'جاري التحقق...' : 'دخول'}</button>
+          <button disabled={loading} className="w-full py-4 rounded-xl bg-[#004645] text-white font-black text-base hover:bg-[#013937] active:scale-[0.99] transition disabled:opacity-50 shadow-lg">{loading ? 'جاري التحقق...' : 'دخول'}</button>
         </form>
       </div>
     </div>
@@ -183,12 +184,12 @@ export default function App() {
 
   return (
     <div className="min-h-screen">
-      <header className="no-print bg-slate-900 text-white border-b-4 border-amber-400">
+      <header className="no-print bg-[#004645] text-white border-b-4 border-[#fbe122]">
         <div className="max-w-6xl mx-auto px-4 md:px-6 py-4 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-white/10 border border-white/15 rounded-lg"><Palette className="w-5 h-5 text-amber-400" /></div>
+            <div className="p-2 bg-white/10 border border-white/15 rounded-lg"><Palette className="w-5 h-5 text-[#fbe122]" /></div>
             <div>
-              <h1 className="font-black text-base md:text-lg leading-tight">منظومة الحضور والغياب — التربية الفنية</h1>
+              <h1 className="font-black text-base md:text-lg leading-tight">منظومة الحضور والغياب — أكاديمية آفاق للفنون والثقافة</h1>
               <p className="text-[11px] text-slate-400 font-bold">الفنون البصرية — الأدائية — الموسيقى</p>
             </div>
           </div>
@@ -222,15 +223,15 @@ export default function App() {
 }
 
 function NavBtn({ active, onClick, icon, label }) {
-  return <button onClick={onClick} className={`flex items-center gap-1.5 text-xs font-bold px-4 py-2.5 rounded-lg transition whitespace-nowrap ${active ? 'bg-slate-900 text-white' : 'text-slate-500 hover:bg-slate-100'}`}>{icon}{label}</button>;
+  return <button onClick={onClick} className={`flex items-center gap-1.5 text-xs font-bold px-4 py-2.5 rounded-lg transition whitespace-nowrap ${active ? 'bg-[#004645] text-white' : 'text-slate-500 hover:bg-slate-100'}`}>{icon}{label}</button>;
 }
 
 function StatCard({ label, value, sub, tone }) {
   const tones = {
-    dark: 'bg-slate-900 text-white',
-    green: 'bg-emerald-700 text-white',
-    red: 'bg-rose-700 text-white',
-    gold: 'bg-amber-500 text-slate-900',
+    dark: 'bg-[#262674] text-white',
+    green: 'bg-[#004645] text-white',
+    red: 'bg-[#621244] text-white',
+    gold: 'bg-[#d17e30] text-white',
   };
   return (
     <div className={`rounded-xl p-4 border border-slate-200 shadow-sm ${tones[tone] || tones.dark}`}>
@@ -324,7 +325,7 @@ function AttendanceView({ myTracks, myGrades }) {
           const c = trackStyle[t.id] || trackStyle.visual;
           const on = track === t.id;
           return (
-            <button key={t.id} onClick={() => setTrack(t.id)} className={`flex items-center gap-3 rounded-xl p-4 border text-right transition bg-white ${on ? 'border-slate-900 shadow-md border-r-4' : 'border-slate-200 hover:border-slate-400'}`}>
+            <button key={t.id} onClick={() => setTrack(t.id)} className={`flex items-center gap-3 rounded-xl p-4 border text-right transition bg-white ${on ? 'border-[#004645] shadow-md border-r-4' : 'border-slate-200 hover:border-slate-400'}`}>
               <span className={`p-2.5 rounded-lg border ${c.chip}`}>{c.icon}</span>
               <span><span className="block font-black text-sm text-slate-900">{t.name}</span>
               <span className="block text-[11px] font-bold text-slate-400">{on ? 'المادة المحددة' : 'اضغط للتبديل'}</span></span>
@@ -335,7 +336,7 @@ function AttendanceView({ myTracks, myGrades }) {
 
       <div className="no-print bg-white rounded-xl shadow-sm border border-slate-200 p-4 space-y-3">
         <div className="flex flex-wrap gap-2">
-          {myGrades.map(g => <button key={g.id} onClick={() => setGradeId(g.id)} className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold border transition ${gradeId === g.id ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'}`}><GraduationCap className="w-4 h-4" />{g.name}</button>)}
+          {myGrades.map(g => <button key={g.id} onClick={() => setGradeId(g.id)} className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold border transition ${gradeId === g.id ? 'bg-[#004645] text-white border-[#004645]' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'}`}><GraduationCap className="w-4 h-4" />{g.name}</button>)}
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5">
@@ -344,11 +345,11 @@ function AttendanceView({ myTracks, myGrades }) {
               {SEMESTER_SCHEDULE.map(w => <option key={w.id} value={w.id}>{w.label} ({weekRange(w)}){w.id === currentWeekId ? ' — الحالي' : ''}</option>)}
             </select>
             <button onClick={() => setWeekId(w => Math.min(19, w + 1))} disabled={weekId >= 19} className="px-2 py-1 font-black text-slate-700 disabled:opacity-30">›</button>
-            {weekId !== currentWeekId && <button onClick={() => setWeekId(currentWeekId)} className="text-[10px] font-bold bg-slate-900 text-white px-2 py-1 rounded-md">الأسبوع الحالي</button>}
+            {weekId !== currentWeekId && <button onClick={() => setWeekId(currentWeekId)} className="text-[10px] font-bold bg-[#004645] text-white px-2 py-1 rounded-md">الأسبوع الحالي</button>}
           </div>
           <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 flex-1 min-w-[160px]"><Search className="w-4 h-4 text-slate-400" /><input value={q} onChange={e => setQ(e.target.value)} placeholder="بحث باسم الطالب..." className="bg-transparent outline-none text-sm font-bold w-full" /></div>
-          <button onClick={save} disabled={saving || !dirtyCount} className="flex items-center gap-1.5 text-sm font-black text-white px-5 py-2 rounded-lg bg-emerald-700 hover:bg-emerald-800 transition disabled:opacity-40"><Save className="w-4 h-4" />{saving ? 'جاري الحفظ...' : `حفظ الأسبوع${dirtyCount ? ` (${dirtyCount})` : ''}`}</button>
-          <button onClick={() => window.print()} className="flex items-center gap-1.5 text-sm font-bold bg-slate-900 text-white px-4 py-2 rounded-lg hover:bg-slate-800"><Printer className="w-4 h-4" />طباعة</button>
+          <button onClick={save} disabled={saving || !dirtyCount} className="flex items-center gap-1.5 text-sm font-black text-white px-5 py-2 rounded-lg bg-[#004645] hover:bg-[#013937] transition disabled:opacity-40"><Save className="w-4 h-4" />{saving ? 'جاري الحفظ...' : `حفظ الأسبوع${dirtyCount ? ` (${dirtyCount})` : ''}`}</button>
+          <button onClick={() => window.print()} className="flex items-center gap-1.5 text-sm font-bold bg-[#004645] text-white px-4 py-2 rounded-lg hover:bg-[#013937]"><Printer className="w-4 h-4" />طباعة</button>
         </div>
         {msg && <div className="text-xs font-bold text-slate-700 bg-slate-100 border border-slate-200 rounded-lg px-3 py-2">{msg}</div>}
       </div>
@@ -360,9 +361,9 @@ function AttendanceView({ myTracks, myGrades }) {
       </div>
 
       <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-x-auto print-sheet print-shadow-none">
-        <div className="print-head bg-slate-900 text-white px-5 py-4 flex flex-wrap justify-between items-center gap-3 border-b-4 border-amber-400">
+        <div className="print-head bg-[#004645] text-white px-5 py-4 flex flex-wrap justify-between items-center gap-3 border-b-4 border-[#fbe122]">
           <div>
-            <div className="font-black text-base">منظومة الحضور والغياب — التربية الفنية</div>
+            <div className="font-black text-base">منظومة الحضور والغياب — أكاديمية آفاق للفنون والثقافة</div>
             <div className="text-xs font-bold text-slate-300 mt-1">كشف الحضور الأسبوعي — {myTracks.find(t => t.id === track)?.name} — {myGrades.find(g => g.id === gradeId)?.name}</div>
           </div>
           <div className="text-center">
@@ -381,7 +382,7 @@ function AttendanceView({ myTracks, myGrades }) {
                     <div className="flex flex-col items-center gap-0.5">
                       <span className="font-bold text-slate-700">{DAY_NAMES[i]}</span>
                       <span dir="ltr" className="text-[10px] font-bold text-slate-500">{shortDM(d)}</span>
-                      <button onClick={() => markDayAll(d, 'present')} title="تحديد الكل حاضر لهذا اليوم" className="no-print text-[10px] font-bold text-emerald-700 hover:underline">الكل حاضر</button>
+                      <button onClick={() => markDayAll(d, 'present')} title="تحديد الكل حاضر لهذا اليوم" className="no-print text-[10px] font-bold text-[#004645] hover:underline">الكل حاضر</button>
                     </div>
                   </th>
                 ))}
@@ -397,8 +398,8 @@ function AttendanceView({ myTracks, myGrades }) {
                     return (
                       <td key={d} className="p-1.5 text-center border-r border-slate-100">
                         <div className="no-print flex justify-center gap-1">
-                          <button onClick={() => toggle(s.id, d, 'present')} title="حاضر" className={`w-9 h-9 rounded-md border font-black text-sm transition ${cur === 'present' ? 'bg-emerald-600 border-emerald-700 text-white' : 'bg-white border-slate-300 text-slate-400 hover:border-emerald-500'}`}>ح</button>
-                          <button onClick={() => toggle(s.id, d, 'absent')} title="غائب" className={`w-9 h-9 rounded-md border font-black text-sm transition ${cur === 'absent' ? 'bg-rose-600 border-rose-700 text-white' : 'bg-white border-slate-300 text-slate-400 hover:border-rose-500'}`}>غ</button>
+                          <button onClick={() => toggle(s.id, d, 'present')} title="حاضر" className={`w-9 h-9 rounded-md border font-black text-sm transition ${cur === 'present' ? 'bg-[#004645] border-[#003a39] text-white' : 'bg-white border-slate-300 text-slate-400 hover:border-[#004645]'}`}>ح</button>
+                          <button onClick={() => toggle(s.id, d, 'absent')} title="غائب" className={`w-9 h-9 rounded-md border font-black text-sm transition ${cur === 'absent' ? 'bg-[#621244] border-[#4a0d33] text-white' : 'bg-white border-slate-300 text-slate-400 hover:border-[#621244]'}`}>غ</button>
                         </div>
                         {(cur === 'late' || cur === 'excused') && <div className="no-print text-[10px] font-bold text-amber-700 mt-0.5">{cur === 'late' ? 'متأخر' : 'مستأذن'}</div>}
                         <div className={`hidden print:block font-black print-mark ${cur === 'present' ? 'print-p' : cur === 'absent' ? 'print-a' : ''}`}>{cur === 'present' ? 'ح' : cur === 'absent' ? 'غ' : cur === 'late' ? 'م' : cur === 'excused' ? 'ع' : '—'}</div>
@@ -428,7 +429,7 @@ function AttendanceView({ myTracks, myGrades }) {
               <div className="mt-7 text-[11px] font-bold">الختم والتوقيع: ............................</div>
             </div>
           </div>
-          <div className="text-center text-[10px] font-bold print-foot mt-3">طُبع بتاريخ <span dir="ltr">{todayStr()}</span> — منظومة الحضور والغياب</div>
+          <div className="text-center text-[10px] font-bold print-foot mt-3">طُبع بتاريخ <span dir="ltr">{todayStr()}</span> — أكاديمية آفاق للفنون والثقافة</div>
         </div>
       </div>
     </div>
@@ -474,8 +475,8 @@ function ReportsView({ myTracks, myGrades, tracks, grades }) {
         <label className="text-[11px] font-bold text-slate-500">إلى:<input type="date" value={to} onChange={e => setTo(e.target.value)} className="block border border-slate-300 rounded-lg px-3 py-1.5 font-bold mt-1 text-slate-800" /></label>
         <label className="text-[11px] font-bold text-slate-500">المادة:<select value={track} onChange={e => setTrack(e.target.value)} className="block border border-slate-300 rounded-lg px-3 py-1.5 font-bold mt-1 text-slate-800"><option value="">الكل</option>{myTracks.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}</select></label>
         <label className="text-[11px] font-bold text-slate-500">الصف:<select value={gradeId} onChange={e => setGradeId(e.target.value)} className="block border border-slate-300 rounded-lg px-3 py-1.5 font-bold mt-1 text-slate-800"><option value="">الكل</option>{myGrades.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}</select></label>
-        <button onClick={run} className="bg-slate-900 text-white text-sm font-bold px-6 py-2 rounded-lg">عرض التقرير</button>
-        <button onClick={csv} className="flex items-center gap-1.5 bg-emerald-700 text-white text-sm font-bold px-4 py-2 rounded-lg"><FileDown className="w-4 h-4" />تصدير CSV</button>
+        <button onClick={run} className="bg-[#004645] text-white text-sm font-bold px-6 py-2 rounded-lg">عرض التقرير</button>
+        <button onClick={csv} className="flex items-center gap-1.5 bg-[#004645] text-white text-sm font-bold px-4 py-2 rounded-lg"><FileDown className="w-4 h-4" />تصدير CSV</button>
         <button onClick={() => window.print()} className="bg-white border border-slate-300 text-slate-700 text-sm font-bold px-4 py-2 rounded-lg">طباعة</button>
         {msg && <span className="text-[11px] font-bold text-slate-400">{msg}</span>}
       </div>
@@ -495,7 +496,7 @@ function ReportsView({ myTracks, myGrades, tracks, grades }) {
               <td className="p-3 text-center text-[11px] text-slate-500 font-bold">{gName(r.gradeId)}</td>
               <td className="p-3 text-center text-emerald-700 font-black">{r.present}</td>
               <td className="p-3 text-center text-rose-700 font-black">{r.absent}</td>
-              <td className="p-3"><div className="flex items-center gap-2"><div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden"><div className={`h-full rounded-full ${r.rate >= 85 ? 'bg-emerald-600' : r.rate >= 60 ? 'bg-amber-500' : 'bg-rose-600'}`} style={{ width: r.rate + '%' }} /></div><span className="font-black text-xs w-10 text-slate-700">{r.rate}%</span></div></td>
+              <td className="p-3"><div className="flex items-center gap-2"><div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden"><div className={`h-full rounded-full ${r.rate >= 85 ? 'bg-[#004645]' : r.rate >= 60 ? 'bg-[#d17e30]' : 'bg-[#621244]'}`} style={{ width: r.rate + '%' }} /></div><span className="font-black text-xs w-10 text-slate-700">{r.rate}%</span></div></td>
             </tr>))}
             {!rows.length && <tr><td colSpan={6} className="p-10 text-center text-slate-400 font-bold">لا توجد بيانات في الفترة المحددة</td></tr>}</tbody>
         </table>
@@ -557,13 +558,13 @@ function StudentsView({ grades, tracks }) {
   return (
     <div className="space-y-4">
       <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-4 space-y-3">
-        <div className="flex flex-wrap gap-2">{tracks.map(t => <button key={t.id} onClick={() => setTrack(t.id)} className={`px-4 py-2 rounded-lg text-xs font-bold border transition ${track === t.id ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'}`}>{t.icon} {t.name}</button>)}</div>
-        <div className="flex flex-wrap gap-2">{grades.map(g => <button key={g.id} onClick={() => setGradeId(g.id)} className={`px-4 py-2 rounded-lg text-xs font-bold border transition ${gradeId === g.id ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'}`}>{g.name} <span className="opacity-60">({list.length})</span></button>)}</div>
+        <div className="flex flex-wrap gap-2">{tracks.map(t => <button key={t.id} onClick={() => setTrack(t.id)} className={`px-4 py-2 rounded-lg text-xs font-bold border transition ${track === t.id ? 'bg-[#004645] text-white border-[#004645]' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'}`}>{t.icon} {t.name}</button>)}</div>
+        <div className="flex flex-wrap gap-2">{grades.map(g => <button key={g.id} onClick={() => setGradeId(g.id)} className={`px-4 py-2 rounded-lg text-xs font-bold border transition ${gradeId === g.id ? 'bg-[#004645] text-white border-[#004645]' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'}`}>{g.name} <span className="opacity-60">({list.length})</span></button>)}</div>
         <div className="text-[11px] font-bold text-slate-500">القائمة الحالية: {trackName(track)} — {grades.find(g => g.id === gradeId)?.name} ({list.length} طالب)</div>
-        <div className="flex gap-2"><input value={name} onChange={e => setName(e.target.value)} onKeyDown={e => e.key === 'Enter' && add()} placeholder="اسم طالب جديد..." className="flex-1 border border-slate-300 rounded-lg px-3 py-2 font-bold outline-none focus:border-slate-900" /><button onClick={add} className="flex items-center gap-1 bg-slate-900 text-white text-sm font-bold px-5 py-2 rounded-lg"><Plus className="w-4 h-4" />إضافة</button></div>
-        <div className="flex gap-2"><textarea value={bulk} onChange={e => setBulk(e.target.value)} rows={3} placeholder="لصق جماعي — كل اسم في سطر مستقل" className="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm font-bold outline-none focus:border-slate-900" /><button onClick={addBulk} className="bg-emerald-700 text-white text-sm font-bold px-5 py-2 rounded-lg h-fit">لصق جماعي</button></div>
+        <div className="flex gap-2"><input value={name} onChange={e => setName(e.target.value)} onKeyDown={e => e.key === 'Enter' && add()} placeholder="اسم طالب جديد..." className="flex-1 border border-slate-300 rounded-lg px-3 py-2 font-bold outline-none focus:border-[#004645]" /><button onClick={add} className="flex items-center gap-1 bg-[#004645] text-white text-sm font-bold px-5 py-2 rounded-lg"><Plus className="w-4 h-4" />إضافة</button></div>
+        <div className="flex gap-2"><textarea value={bulk} onChange={e => setBulk(e.target.value)} rows={3} placeholder="لصق جماعي — كل اسم في سطر مستقل" className="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm font-bold outline-none focus:border-[#004645]" /><button onClick={addBulk} className="bg-[#004645] text-white text-sm font-bold px-5 py-2 rounded-lg h-fit">لصق جماعي</button></div>
         <div className="flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
-          <label className={`flex items-center gap-1.5 text-xs font-bold px-4 py-2 rounded-lg cursor-pointer transition border ${fileBusy ? 'bg-slate-100 text-slate-400 border-slate-200' : 'bg-white text-slate-700 border-slate-300 hover:border-slate-900'}`}><FileUp className="w-4 h-4" />{fileBusy ? 'جاري الاستيراد...' : 'استيراد ملف (CSV / JSON)'}<input type="file" accept=".json,.csv,.txt" className="hidden" onChange={importFile} disabled={fileBusy} /></label>
+          <label className={`flex items-center gap-1.5 text-xs font-bold px-4 py-2 rounded-lg cursor-pointer transition border ${fileBusy ? 'bg-slate-100 text-slate-400 border-slate-200' : 'bg-white text-slate-700 border-slate-300 hover:border-[#004645]'}`}><FileUp className="w-4 h-4" />{fileBusy ? 'جاري الاستيراد...' : 'استيراد ملف (CSV / JSON)'}<input type="file" accept=".json,.csv,.txt" className="hidden" onChange={importFile} disabled={fileBusy} /></label>
           <span className="text-[11px] text-slate-400 font-bold">إلى القائمة الحالية فقط</span>
         </div>
         {(fileMsg || msg) && <div className="text-xs font-bold text-slate-700 bg-slate-100 border border-slate-200 rounded-lg px-3 py-2">{fileMsg || msg}</div>}
@@ -573,12 +574,12 @@ function StudentsView({ grades, tracks }) {
           <div key={s.id} className="border-t first:border-0 border-slate-100 px-4 py-2.5 hover:bg-slate-50">
             {editing?.id === s.id ? (
               <div className="space-y-2">
-                <input value={editing.name} onChange={e => setEditing({ ...editing, name: e.target.value })} className="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-sm font-bold outline-none focus:border-slate-900" />
+                <input value={editing.name} onChange={e => setEditing({ ...editing, name: e.target.value })} className="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-sm font-bold outline-none focus:border-[#004645]" />
                 <div className="flex flex-wrap items-center gap-2">
                   <select value={editing.track} onChange={e => setEditing({ ...editing, track: e.target.value })} className="border border-slate-300 rounded-lg px-2 py-1.5 text-xs font-bold">{tracks.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}</select>
                   <select value={editing.gradeId} onChange={e => setEditing({ ...editing, gradeId: e.target.value })} className="border border-slate-300 rounded-lg px-2 py-1.5 text-xs font-bold">{grades.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}</select>
                   <label className="flex items-center gap-1 text-[11px] font-bold text-slate-600"><input type="checkbox" checked={editing.moveRecords} onChange={e => setEditing({ ...editing, moveRecords: e.target.checked })} className="accent-slate-900" />نقل سجلات حضوره معه</label>
-                  <button onClick={saveEdit} className="text-xs font-bold bg-slate-900 text-white px-3 py-1.5 rounded-lg">حفظ</button>
+                  <button onClick={saveEdit} className="text-xs font-bold bg-[#004645] text-white px-3 py-1.5 rounded-lg">حفظ</button>
                   <button onClick={() => setEditing(null)} className="text-xs font-bold bg-slate-100 px-3 py-1.5 rounded-lg">إلغاء</button>
                 </div>
               </div>
@@ -620,14 +621,14 @@ function UsersView({ tracks, grades, me }) {
       <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-5 space-y-3">
         <h3 className="font-black text-slate-900 flex items-center gap-2 text-sm"><UserCog className="w-5 h-5" />إنشاء حساب جديد</h3>
         <div className="grid md:grid-cols-4 gap-2">
-          <input value={form.username} onChange={e => setForm({ ...form, username: e.target.value })} placeholder="اسم المستخدم" dir="ltr" className="border border-slate-300 rounded-lg px-3 py-2 font-bold outline-none focus:border-slate-900 text-left" />
-          <input value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} placeholder="كلمة المرور" dir="ltr" className="border border-slate-300 rounded-lg px-3 py-2 font-bold outline-none focus:border-slate-900 text-left" />
-          <input value={form.displayName} onChange={e => setForm({ ...form, displayName: e.target.value })} placeholder="الاسم المعروض" className="border border-slate-300 rounded-lg px-3 py-2 font-bold outline-none focus:border-slate-900" />
+          <input value={form.username} onChange={e => setForm({ ...form, username: e.target.value })} placeholder="اسم المستخدم" dir="ltr" className="border border-slate-300 rounded-lg px-3 py-2 font-bold outline-none focus:border-[#004645] text-left" />
+          <input value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} placeholder="كلمة المرور" dir="ltr" className="border border-slate-300 rounded-lg px-3 py-2 font-bold outline-none focus:border-[#004645] text-left" />
+          <input value={form.displayName} onChange={e => setForm({ ...form, displayName: e.target.value })} placeholder="الاسم المعروض" className="border border-slate-300 rounded-lg px-3 py-2 font-bold outline-none focus:border-[#004645]" />
           <select value={form.role} onChange={e => setForm({ ...form, role: e.target.value })} className="border border-slate-300 rounded-lg px-3 py-2 font-bold text-slate-800"><option value="teacher">معلم</option><option value="supervisor">مشرف</option><option value="admin">مدير</option>{isDev && <option value="developer">مطور المنصة</option>}</select>
         </div>
-        <div className="text-xs font-bold text-slate-600">المواد:<div className="flex gap-1.5 mt-1.5 flex-wrap">{tracks.map(t => <button key={t.id} onClick={() => toggle('allowedTracks', t.id)} className={`px-3.5 py-1.5 rounded-lg border text-xs font-bold transition ${form.allowedTracks.includes(t.id) ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'}`}>{t.icon} {t.name}</button>)}</div></div>
-        <div className="text-xs font-bold text-slate-600">الصفوف:<div className="flex gap-1.5 mt-1.5 flex-wrap">{grades.map(g => <button key={g.id} onClick={() => toggle('allowedGrades', g.id)} className={`px-3.5 py-1.5 rounded-lg border text-xs font-bold transition ${form.allowedGrades.includes(g.id) ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'}`}>{g.short}</button>)}</div></div>
-        <button onClick={create} className="flex items-center gap-1.5 bg-slate-900 text-white text-sm font-bold px-6 py-2.5 rounded-lg"><Check className="w-4 h-4" />إنشاء الحساب</button>
+        <div className="text-xs font-bold text-slate-600">المواد:<div className="flex gap-1.5 mt-1.5 flex-wrap">{tracks.map(t => <button key={t.id} onClick={() => toggle('allowedTracks', t.id)} className={`px-3.5 py-1.5 rounded-lg border text-xs font-bold transition ${form.allowedTracks.includes(t.id) ? 'bg-[#004645] text-white border-[#004645]' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'}`}>{t.icon} {t.name}</button>)}</div></div>
+        <div className="text-xs font-bold text-slate-600">الصفوف:<div className="flex gap-1.5 mt-1.5 flex-wrap">{grades.map(g => <button key={g.id} onClick={() => toggle('allowedGrades', g.id)} className={`px-3.5 py-1.5 rounded-lg border text-xs font-bold transition ${form.allowedGrades.includes(g.id) ? 'bg-[#004645] text-white border-[#004645]' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'}`}>{g.short}</button>)}</div></div>
+        <button onClick={create} className="flex items-center gap-1.5 bg-[#004645] text-white text-sm font-bold px-6 py-2.5 rounded-lg"><Check className="w-4 h-4" />إنشاء الحساب</button>
         {msg && <div className="text-xs font-bold text-slate-700 bg-slate-100 border border-slate-200 rounded-lg px-3 py-2">{msg}</div>}
       </div>
       <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
@@ -663,9 +664,9 @@ function PasswordView() {
   return (
     <div className="max-w-md bg-white border border-slate-200 rounded-xl shadow-sm p-6 space-y-3">
       <h3 className="font-black text-slate-900 flex items-center gap-2 text-sm"><KeyRound className="w-5 h-5" />تغيير كلمة المرور</h3>
-      <input value={o} onChange={e => setO(e.target.value)} type="password" placeholder="كلمة المرور الحالية" className="w-full border border-slate-300 rounded-lg px-3 py-2.5 font-bold outline-none focus:border-slate-900" />
-      <input value={n} onChange={e => setN(e.target.value)} type="password" placeholder="كلمة المرور الجديدة (6 أحرف على الأقل)" className="w-full border border-slate-300 rounded-lg px-3 py-2.5 font-bold outline-none focus:border-slate-900" />
-      <button onClick={save} className="bg-slate-900 text-white font-bold px-6 py-2.5 rounded-lg">حفظ التغيير</button>
+      <input value={o} onChange={e => setO(e.target.value)} type="password" placeholder="كلمة المرور الحالية" className="w-full border border-slate-300 rounded-lg px-3 py-2.5 font-bold outline-none focus:border-[#004645]" />
+      <input value={n} onChange={e => setN(e.target.value)} type="password" placeholder="كلمة المرور الجديدة (6 أحرف على الأقل)" className="w-full border border-slate-300 rounded-lg px-3 py-2.5 font-bold outline-none focus:border-[#004645]" />
+      <button onClick={save} className="bg-[#004645] text-white font-bold px-6 py-2.5 rounded-lg">حفظ التغيير</button>
       {msg && <div className="text-xs font-bold text-slate-700 bg-slate-100 border border-slate-200 rounded-lg px-3 py-2">{msg}</div>}
     </div>
   );

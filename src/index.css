@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Cairo", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Alexandria", "Cairo", ui-sans-serif, system-ui, sans-serif;
 }
 
 @layer base {
@@ -10,7 +10,7 @@
     font-family: var(--font-sans);
   }
   body {
-    background-color: #eef1f5;
+    background-color: #f4f5f3;
     min-height: 100vh;
   }
 }
@@ -107,10 +107,10 @@
     position: static !important;
   }
   table.att-table thead th {
-    background: #0f172a !important;
+    background: #004645 !important;
     color: #fff !important;
-    border-left: 1px solid #334155 !important;
-    border-bottom: 2px solid #f59e0b !important;
+    border-left: 1px solid #013937 !important;
+    border-bottom: 2px solid #fbe122 !important;
     padding: 6px 4px !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
@@ -133,10 +133,10 @@
     font-size: 15px !important;
   }
   table.att-table .print-mark.print-p {
-    color: #059669 !important;
+    color: #004645 !important;
   }
   table.att-table .print-mark.print-a {
-    color: #e11d48 !important;
+    color: #621244 !important;
   }
   .print-sign {
     background: #f8fafc !important;
