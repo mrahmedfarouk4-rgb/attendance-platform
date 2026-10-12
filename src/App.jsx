@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Palette, Users, ClipboardCheck, BarChart3, LogOut, Printer, Plus, Trash2, Save, Check, X, UserCog, KeyRound, Search, GraduationCap, Music4, Drama, FileDown, FileUp, Building2 } from 'lucide-react';
+import { Palette, Users, ClipboardCheck, BarChart3, LogOut, Printer, Plus, Trash2, Save, Check, X, UserCog, KeyRound, Search, GraduationCap, Music4, Drama, FileDown, FileUp, Building2, Eye, EyeOff, UserRound, LockKeyhole } from 'lucide-react';
 
 const api = async (path, { method = 'GET', body, token } = {}) => {
   const t = token || localStorage.getItem('att_token');
@@ -96,6 +96,7 @@ function parseNamesFile(text) {
 function Login({ onDone }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPw, setShowPw] = useState(false);
   const [err, setErr] = useState('');
   const [loading, setLoading] = useState(false);
   const submit = async (e) => {
@@ -109,38 +110,55 @@ function Login({ onDone }) {
     finally { setLoading(false); }
   };
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-slate-100">
-      <div className="w-full max-w-4xl grid md:grid-cols-2 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden animate-fade-up">
-        <div className="hidden md:flex flex-col justify-between p-8 text-white bg-slate-900">
-          <div>
-            <div className="flex items-center gap-2 text-amber-400 text-xs font-bold"><Building2 className="w-4 h-4" /> منظومة الحضور والغياب</div>
-            <h1 className="text-3xl font-black mt-3 leading-snug">التربية الفنية</h1>
-            <div className="w-16 h-1 bg-amber-400 rounded mt-3" />
-            <p className="text-slate-300 text-sm font-bold mt-3">الفنون البصرية — الفنون الأدائية — الموسيقى</p>
+    <div className="min-h-screen flex items-center justify-center p-4 md:p-8 bg-slate-200">
+      <div className="w-full max-w-5xl grid md:grid-cols-5 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-fade-up">
+        <div className="hidden md:flex md:col-span-2 flex-col justify-between p-10 text-white bg-slate-900 relative overflow-hidden">
+          <div className="absolute -top-24 -left-24 w-72 h-72 rounded-full bg-amber-400/10 blur-2xl" />
+          <div className="absolute -bottom-28 -right-20 w-80 h-80 rounded-full bg-indigo-500/15 blur-2xl" />
+          <div className="relative">
+            <div className="flex items-center gap-2">
+              <span className="p-2 bg-amber-400 rounded-lg"><Building2 className="w-5 h-5 text-slate-900" /></span>
+              <span className="text-amber-400 text-xs font-black tracking-wide">منظومة الحضور والغياب</span>
+            </div>
+            <h1 className="text-4xl font-black mt-6 leading-tight">التربية<br />الفنية</h1>
+            <div className="w-20 h-1 bg-amber-400 rounded mt-4" />
+            <p className="text-slate-300 text-sm font-bold mt-4">الفنون البصرية — الأدائية — الموسيقى</p>
           </div>
-          <div className="space-y-2">
-            {['الفنون البصرية', 'الفنون الأدائية', 'الموسيقى'].map((t) => (
-              <div key={t} className="border-r-2 border-amber-400 pr-3 py-1">
-                <div className="font-bold text-sm">{t}</div>
+          <div className="relative space-y-4 mt-10">
+            {[['01', 'الفنون البصرية'], ['02', 'الفنون الأدائية'], ['03', 'الموسيقى']].map(([n, t]) => (
+              <div key={t} className="flex items-center gap-4">
+                <span className="font-mono text-amber-400/80 text-xs font-bold" dir="ltr">{n}</span>
+                <span className="font-black text-base">{t}</span>
+                <span className="flex-1 h-px bg-white/10" />
               </div>
             ))}
           </div>
+          <div className="relative text-[11px] text-slate-500 font-bold">الصفوف: الرابع — الخامس — الأول والثاني متوسط</div>
         </div>
-        <form onSubmit={submit} className="p-8 space-y-4">
+        <form onSubmit={submit} className="md:col-span-3 p-8 md:p-12 space-y-5">
           <div>
-            <h2 className="font-black text-xl text-slate-900">تسجيل الدخول</h2>
-            <p className="text-xs text-slate-500 font-bold mt-1">أدخل بيانات الاعتماد الخاصة بك للمتابعة</p>
+            <h2 className="font-black text-2xl text-slate-900">تسجيل الدخول</h2>
+            <p className="text-xs text-slate-500 font-bold mt-1.5">أدخل بيانات الاعتماد الخاصة بك للمتابعة</p>
           </div>
-          {err && <div className="bg-rose-50 border border-rose-200 text-rose-800 text-sm font-bold rounded-lg px-4 py-2.5">{err}</div>}
+          {err && <div className="bg-rose-50 border-r-4 border-rose-500 text-rose-800 text-sm font-bold rounded-lg px-4 py-3">{err}</div>}
           <div>
-            <label className="text-xs font-bold text-slate-600">اسم المستخدم</label>
-            <input value={username} onChange={e => setUsername(e.target.value)} autoFocus dir="ltr" className="mt-1 w-full border border-slate-300 rounded-lg px-4 py-3 font-bold outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200 transition text-left" />
+            <label className="text-xs font-black text-slate-600">اسم المستخدم</label>
+            <div className="relative mt-1.5">
+              <input value={username} onChange={e => setUsername(e.target.value)} autoFocus dir="ltr" className="w-full border border-slate-300 rounded-xl pl-11 pr-4 py-3.5 font-bold outline-none focus:border-slate-900 focus:ring-4 focus:ring-slate-100 transition text-left" />
+              <UserRound className="w-5 h-5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            </div>
           </div>
           <div>
-            <label className="text-xs font-bold text-slate-600">كلمة المرور</label>
-            <input value={password} onChange={e => setPassword(e.target.value)} type="password" dir="ltr" className="mt-1 w-full border border-slate-300 rounded-lg px-4 py-3 font-bold outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200 transition text-left" />
+            <label className="text-xs font-black text-slate-600">كلمة المرور</label>
+            <div className="relative mt-1.5">
+              <input value={password} onChange={e => setPassword(e.target.value)} type={showPw ? 'text' : 'password'} dir="ltr" className="w-full border border-slate-300 rounded-xl pl-20 pr-11 py-3.5 font-bold outline-none focus:border-slate-900 focus:ring-4 focus:ring-slate-100 transition text-left" />
+              <LockKeyhole className="w-5 h-5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <button type="button" onClick={() => setShowPw(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition" title={showPw ? 'إخفاء' : 'إظهار'}>
+                {showPw ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
+            </div>
           </div>
-          <button disabled={loading} className="w-full py-3 rounded-lg bg-slate-900 text-white font-black hover:bg-slate-800 transition disabled:opacity-50">{loading ? 'جاري التحقق...' : 'دخول'}</button>
+          <button disabled={loading} className="w-full py-4 rounded-xl bg-slate-900 text-white font-black text-base hover:bg-slate-800 active:scale-[0.99] transition disabled:opacity-50 shadow-lg">{loading ? 'جاري التحقق...' : 'دخول'}</button>
         </form>
       </div>
     </div>
@@ -342,14 +360,15 @@ function AttendanceView({ myTracks, myGrades }) {
       </div>
 
       <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-x-auto print-sheet print-shadow-none">
-        <div className="hidden print:block px-6 pt-5 pb-3 text-center">
-          <div className="font-black text-lg text-slate-900">منظومة الحضور والغياب — التربية الفنية</div>
-          <div className="font-bold text-sm text-slate-800 mt-1">كشف الحضور الأسبوعي — {myTracks.find(t => t.id === track)?.name} — {myGrades.find(g => g.id === gradeId)?.name}</div>
-          <div className="font-bold text-xs text-slate-600 mt-1">{week?.label} <span dir="ltr">({dates.length ? `${shortDM(dates[0])} - ${shortDM(dates[4])}` : ''})</span> — تاريخ الطباعة: <span dir="ltr">{todayStr()}</span></div>
-        </div>
-        <div className="no-print bg-slate-900 text-white px-4 py-3 font-bold flex flex-wrap justify-between gap-2 border-b-2 border-amber-400">
-          <span className="text-sm">كشف الحضور الأسبوعي — {myTracks.find(t => t.id === track)?.name} — {myGrades.find(g => g.id === gradeId)?.name}</span>
-          <span className="text-xs text-slate-300">{week?.label} <span dir="ltr">({dates.length ? `${shortDM(dates[0])} - ${shortDM(dates[4])}` : ''})</span></span>
+        <div className="print-head bg-slate-900 text-white px-5 py-4 flex flex-wrap justify-between items-center gap-3 border-b-4 border-amber-400">
+          <div>
+            <div className="font-black text-base">منظومة الحضور والغياب — التربية الفنية</div>
+            <div className="text-xs font-bold text-slate-300 mt-1">كشف الحضور الأسبوعي — {myTracks.find(t => t.id === track)?.name} — {myGrades.find(g => g.id === gradeId)?.name}</div>
+          </div>
+          <div className="text-center">
+            <div className="font-black text-sm">{week?.label}</div>
+            <div className="text-[11px] font-bold text-slate-300 mt-0.5" dir="ltr">{dates.length ? `${shortDM(dates[0])} - ${shortDM(dates[4])}` : ''}</div>
+          </div>
         </div>
         {loading ? <div className="p-10 text-center font-bold text-slate-400">جاري تحميل الكشف...</div> : (
           <table className="att-table w-full text-sm min-w-[760px]">
@@ -372,7 +391,7 @@ function AttendanceView({ myTracks, myGrades }) {
               {filtered.map((s, i) => (
                 <tr key={s.id} className="border-t border-slate-100 hover:bg-slate-50 transition">
                   <td className="p-2 text-center font-bold text-slate-300">{i + 1}</td>
-                  <td className="p-2"><span className="flex items-center gap-2"><span className={`print:hidden w-8 h-8 rounded-full flex items-center justify-center font-black text-sm shrink-0 ${avatarTones[s.id % avatarTones.length]}`}>{s.name.trim()[0]}</span><span className="font-bold text-slate-800">{s.name}</span></span></td>
+                  <td className="p-2"><span className="flex items-center gap-2"><span className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-sm shrink-0 print-avatar ${avatarTones[s.id % avatarTones.length]}`}>{s.name.trim()[0]}</span><span className="font-bold text-slate-800">{s.name}</span></span></td>
                   {dates.map(d => {
                     const cur = grid[`${s.id}|${d}`];
                     return (
@@ -382,7 +401,7 @@ function AttendanceView({ myTracks, myGrades }) {
                           <button onClick={() => toggle(s.id, d, 'absent')} title="غائب" className={`w-9 h-9 rounded-md border font-black text-sm transition ${cur === 'absent' ? 'bg-rose-600 border-rose-700 text-white' : 'bg-white border-slate-300 text-slate-400 hover:border-rose-500'}`}>غ</button>
                         </div>
                         {(cur === 'late' || cur === 'excused') && <div className="no-print text-[10px] font-bold text-amber-700 mt-0.5">{cur === 'late' ? 'متأخر' : 'مستأذن'}</div>}
-                        <div className="hidden print:block font-black text-slate-900">{cur === 'present' ? 'ح' : cur === 'absent' ? 'غ' : cur === 'late' ? 'م' : cur === 'excused' ? 'ع' : '—'}</div>
+                        <div className={`hidden print:block font-black print-mark ${cur === 'present' ? 'print-p' : cur === 'absent' ? 'print-a' : ''}`}>{cur === 'present' ? 'ح' : cur === 'absent' ? 'غ' : cur === 'late' ? 'م' : cur === 'excused' ? 'ع' : '—'}</div>
                       </td>
                     );
                   })}
@@ -398,11 +417,18 @@ function AttendanceView({ myTracks, myGrades }) {
           <span className="bg-white border border-slate-200 px-3 py-1 rounded-md">الطلاب: {stats.total}</span>
           {dirtyCount > 0 && <span className="no-print bg-amber-50 text-amber-800 border border-amber-300 px-3 py-1 rounded-md">تغييرات غير محفوظة: {dirtyCount}</span>}
         </div>
-        <div className="hidden print:block px-6 py-4">
-          <div className="flex justify-between gap-6 text-xs font-bold text-slate-800">
-            <div className="text-center"><div>معلم المادة</div><div className="mt-8 border-t border-slate-400 pt-1 px-10">الاسم والتوقيع</div></div>
-            <div className="text-center"><div>إدارة المدرسة</div><div className="mt-8 border-t border-slate-400 pt-1 px-10">الختم والتوقيع</div></div>
+        <div className="hidden print:block px-6 pb-5 pt-3">
+          <div className="flex justify-between gap-8">
+            <div className="flex-1 rounded-lg px-4 py-3 text-center print-sign">
+              <div className="text-xs font-black">معلم المادة</div>
+              <div className="mt-7 text-[11px] font-bold">الاسم والتوقيع: ............................</div>
+            </div>
+            <div className="flex-1 rounded-lg px-4 py-3 text-center print-sign">
+              <div className="text-xs font-black">إدارة المدرسة</div>
+              <div className="mt-7 text-[11px] font-bold">الختم والتوقيع: ............................</div>
+            </div>
           </div>
+          <div className="text-center text-[10px] font-bold print-foot mt-3">طُبع بتاريخ <span dir="ltr">{todayStr()}</span> — منظومة الحضور والغياب</div>
         </div>
       </div>
     </div>

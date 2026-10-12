@@ -76,36 +76,77 @@
     border-color: #e5e7eb !important;
   }
 
-  /* كشف الحضور الأسبوعي — طباعة رسمية نظيفة */
+  /* كشف الحضور الأسبوعي — طباعة فاخرة وهوامش متساوية */
+  @page {
+    size: A4 portrait;
+    margin: 12mm;
+  }
   .print-sheet {
     box-shadow: none !important;
     border: none !important;
     border-radius: 0 !important;
     overflow: visible !important;
+    margin: 0 auto !important;
+  }
+  .print-head {
+    border-radius: 10px !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
   table.att-table {
     min-width: 0 !important;
     width: 100% !important;
-    border-collapse: collapse !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
     font-size: 12px !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 10px !important;
+    overflow: hidden !important;
   }
   table.att-table thead {
     position: static !important;
   }
-  table.att-table th,
+  table.att-table thead th {
+    background: #0f172a !important;
+    color: #fff !important;
+    border-left: 1px solid #334155 !important;
+    border-bottom: 2px solid #f59e0b !important;
+    padding: 6px 4px !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
   table.att-table td {
-    border: 1px solid #444 !important;
+    border-left: 1px solid #e2e8f0 !important;
+    border-top: 1px solid #e2e8f0 !important;
     padding: 5px 4px !important;
   }
-  table.att-table thead th {
-    background: #f1f5f9 !important;
-    color: #000 !important;
+  table.att-table tbody tr:nth-child(even) td {
+    background: #f8fafc !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
-  table.att-table tbody tr {
-    background: #fff !important;
+  .print-avatar {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
-  table.att-table .print-block {
-    font-size: 14px !important;
+  table.att-table .print-mark {
+    font-size: 15px !important;
+  }
+  table.att-table .print-mark.print-p {
+    color: #059669 !important;
+  }
+  table.att-table .print-mark.print-a {
+    color: #e11d48 !important;
+  }
+  .print-sign {
+    background: #f8fafc !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #0f172a !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .print-foot {
+    color: #64748b !important;
   }
 
   /* Premium Report Utilities */
