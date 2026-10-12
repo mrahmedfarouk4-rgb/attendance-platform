@@ -113,9 +113,19 @@ const requireRole = (...roles) => (req, res, next) => {
 
 async function ensureDefaultAdmin() {
   try {
-    if ((await prisma.user.count()) > 0) return;
     const username = (process.env.ADMIN_USERNAME || 'admin').trim();
     const password = (process.env.ADMIN_PASSWORD || 'admin123').trim();
+    const existing = await prisma.user.findUnique({ where: { username } });
+    // كلمة مرور المدير تُدار من ADMIN_PASSWORD وتُزامن عند كل إقلاع (مثل المطور)
+    if (existing) {
+      const same = await bcrypt.compare(password, existing.passwordHash).catch(() => false);
+      if (!same) {
+        await prisma.user.update({ where: { id: existing.id }, data: { passwordHash: await bcrypt.hash(password, 10), active: true } });
+        console.log('✅ تمت مزامنة كلمة مرور المدير من متغيرات البيئة');
+      }
+      return;
+    }
+    if ((await prisma.user.count()) > 0) return;
     await prisma.user.create({
       data: { username, passwordHash: await bcrypt.hash(password, 10), displayName: 'مدير المنصة', role: 'admin', allowedTracks: '[]', allowedGrades: '[]', active: true },
     });
