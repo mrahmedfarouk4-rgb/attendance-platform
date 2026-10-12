@@ -114,8 +114,8 @@ const requireRole = (...roles) => (req, res, next) => {
 async function ensureDefaultAdmin() {
   try {
     if ((await prisma.user.count()) > 0) return;
-    const username = process.env.ADMIN_USERNAME || 'admin';
-    const password = process.env.ADMIN_PASSWORD || 'admin123';
+    const username = (process.env.ADMIN_USERNAME || 'admin').trim();
+    const password = (process.env.ADMIN_PASSWORD || 'admin123').trim();
     await prisma.user.create({
       data: { username, passwordHash: await bcrypt.hash(password, 10), displayName: 'مدير المنصة', role: 'admin', allowedTracks: '[]', allowedGrades: '[]', active: true },
     });
@@ -127,7 +127,7 @@ async function ensureDefaultAdmin() {
 async function ensureDeveloper() {
   try {
     const username = (process.env.DEVELOPER_USERNAME || '').trim();
-    const password = process.env.DEVELOPER_PASSWORD || '';
+    const password = (process.env.DEVELOPER_PASSWORD || '').trim();
     if (!username || !password) return;
     const existing = await prisma.user.findUnique({ where: { username } });
     if (existing) {
