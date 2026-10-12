@@ -64,9 +64,9 @@ const shortDM = (iso) => { const [, m, d] = String(iso).split('-'); return `${pa
 
 const statusLabel = { present: 'حاضر', absent: 'غائب', late: 'متأخر', excused: 'مستأذن' };
 const trackStyle = {
-  visual: { chip: 'bg-[#c6eee5] text-[#004645] border-[#83d5c4]', icon: <Palette className="w-5 h-5" /> },
-  performing: { chip: 'bg-[#f5d7e8] text-[#621244] border-[#e5a1c8]', icon: <Drama className="w-5 h-5" /> },
-  music: { chip: 'bg-[#c0e1f7] text-[#262674] border-[#83c3eb]', icon: <Music4 className="w-5 h-5" /> },
+  visual: { chip: 'bg-[#c6eee5] text-[#004645] border-[#83d5c4]', img: '/gallery/g7_s.jpg', icon: <Palette className="w-5 h-5" /> },
+  performing: { chip: 'bg-[#f5d7e8] text-[#621244] border-[#e5a1c8]', img: '/gallery/g4_s.jpg', icon: <Drama className="w-5 h-5" /> },
+  music: { chip: 'bg-[#c0e1f7] text-[#262674] border-[#83c3eb]', img: '/gallery/g1_s.jpg', icon: <Music4 className="w-5 h-5" /> },
 };
 const roleStyle = {
   admin: 'bg-[#fddcc8] text-[#7a3c12] border border-[#d17e30]',
@@ -112,20 +112,25 @@ function Login({ onDone }) {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 md:p-8 bg-[#e9efec]">
       <div className="w-full max-w-5xl grid md:grid-cols-5 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-fade-up">
-        <div className="hidden md:flex md:col-span-2 flex-col justify-between p-10 text-white bg-[#004645] relative overflow-hidden">
-          <div className="absolute -top-24 -left-24 w-72 h-72 rounded-full bg-[#fbe122]/10 blur-2xl" />
-          <div className="absolute -bottom-28 -right-20 w-80 h-80 rounded-full bg-[#83c3eb]/15 blur-2xl" />
-          <div className="relative">
-            <div className="flex items-center gap-2">
-              <span className="p-2 bg-[#fbe122] rounded-lg"><Building2 className="w-5 h-5 text-[#004645]" /></span>
-              <span className="text-[#fbe122] text-xs font-black tracking-wide">منظومة الحضور والغياب</span>
+        <div className="hidden md:flex md:col-span-2 flex-col bg-[#004645] text-white relative overflow-hidden">
+          <div className="relative h-60 shrink-0">
+            <img src="/gallery/g2_s.jpg" alt="أكاديمية آفاق" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#004645] via-[#004645]/55 to-transparent" />
+            <div className="absolute bottom-4 right-6 left-6">
+              <div className="flex items-center gap-2">
+                <span className="p-1.5 bg-[#fbe122] rounded-md"><Building2 className="w-4 h-4 text-[#004645]" /></span>
+                <span className="text-[#fbe122] text-[11px] font-black tracking-wide">منظومة الحضور والغياب</span>
+              </div>
+              <h1 className="text-3xl font-black mt-2 leading-tight">التربية الفنية</h1>
             </div>
-            <h1 className="text-4xl font-black mt-6 leading-tight">التربية<br />الفنية</h1>
-            <p className="text-[#c6eee5] text-xs font-bold mt-3">أكاديمية آفاق للفنون والثقافة</p>
-            <div className="w-20 h-1 bg-[#fbe122] rounded mt-4" />
-            <p className="text-slate-300 text-sm font-bold mt-4">الفنون البصرية — الأدائية — الموسيقى</p>
           </div>
-          <div className="relative space-y-4 mt-10">
+          <div className="relative flex-1 flex flex-col justify-between p-8 pt-5">
+          <div>
+            <p className="text-[#c6eee5] text-xs font-bold">أكاديمية آفاق للفنون والثقافة</p>
+            <div className="w-16 h-1 bg-[#fbe122] rounded mt-3" />
+            <p className="text-slate-300 text-sm font-bold mt-3">الفنون البصرية — الأدائية — الموسيقى</p>
+          </div>
+          <div className="space-y-3 mt-6">
             {[['01', 'الفنون البصرية'], ['02', 'الفنون الأدائية'], ['03', 'الموسيقى']].map(([n, t]) => (
               <div key={t} className="flex items-center gap-4">
                 <span className="font-mono text-[#fbe122]/80 text-xs font-bold" dir="ltr">{n}</span>
@@ -134,7 +139,8 @@ function Login({ onDone }) {
               </div>
             ))}
           </div>
-          <div className="relative text-[11px] text-slate-500 font-bold">الصفوف: الرابع — الخامس — الأول والثاني متوسط</div>
+          <div className="text-[11px] text-slate-400 font-bold mt-6">الصفوف: الرابع — الخامس — الأول والثاني متوسط</div>
+          </div>
         </div>
         <form onSubmit={submit} className="md:col-span-3 p-8 md:p-12 space-y-5">
           <div>
@@ -325,10 +331,11 @@ function AttendanceView({ myTracks, myGrades }) {
           const c = trackStyle[t.id] || trackStyle.visual;
           const on = track === t.id;
           return (
-            <button key={t.id} onClick={() => setTrack(t.id)} className={`flex items-center gap-3 rounded-xl p-4 border text-right transition bg-white ${on ? 'border-[#004645] shadow-md border-r-4' : 'border-slate-200 hover:border-slate-400'}`}>
-              <span className={`p-2.5 rounded-lg border ${c.chip}`}>{c.icon}</span>
-              <span><span className="block font-black text-sm text-slate-900">{t.name}</span>
-              <span className="block text-[11px] font-bold text-slate-400">{on ? 'المادة المحددة' : 'اضغط للتبديل'}</span></span>
+            <button key={t.id} onClick={() => setTrack(t.id)} className={`flex items-stretch gap-0 rounded-xl border text-right transition bg-white overflow-hidden ${on ? 'border-[#004645] shadow-md' : 'border-slate-200 hover:border-slate-400'}`}>
+              <img src={c.img} alt={t.name} className="w-20 object-cover shrink-0" loading="lazy" />
+              <span className={`flex-1 p-3 border-r-4 ${on ? 'border-[#fbe122]' : 'border-transparent'}`}>
+                <span className="flex items-center gap-2 font-black text-sm text-slate-900"><span className={`p-1.5 rounded-md border ${c.chip}`}>{c.icon}</span>{t.name}</span>
+              <span className="block text-[11px] font-bold text-slate-400 mt-1">{on ? 'المادة المحددة' : 'اضغط للتبديل'}</span></span>
             </button>
           );
         })}
