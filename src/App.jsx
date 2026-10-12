@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Palette, Users, ClipboardCheck, BarChart3, LogOut, Printer, Plus, Trash2, Save, Check, X, UserCog, KeyRound, CalendarDays, Search, ShieldCheck, GraduationCap, Music4, Drama, FileDown, FileUp, Building2 } from 'lucide-react';
+import { Palette, Users, ClipboardCheck, BarChart3, LogOut, Printer, Plus, Trash2, Save, Check, X, UserCog, KeyRound, Search, GraduationCap, Music4, Drama, FileDown, FileUp, Building2 } from 'lucide-react';
 
 const api = async (path, { method = 'GET', body, token } = {}) => {
   const t = token || localStorage.getItem('att_token');
@@ -119,14 +119,12 @@ function Login({ onDone }) {
             <p className="text-slate-300 text-sm font-bold mt-3">الفنون البصرية — الفنون الأدائية — الموسيقى</p>
           </div>
           <div className="space-y-2">
-            {[['الفنون البصرية', 'الصفوف: الرابع، الخامس، الأول والثاني متوسط'], ['الفنون الأدائية', 'تسجيل أسبوعي وطباعة الكشوف'], ['الموسيقى', 'تقارير ونسب حضور معتمدة']].map(([t, d]) => (
+            {['الفنون البصرية', 'الفنون الأدائية', 'الموسيقى'].map((t) => (
               <div key={t} className="border-r-2 border-amber-400 pr-3 py-1">
                 <div className="font-bold text-sm">{t}</div>
-                <div className="text-[11px] text-slate-400 font-bold">{d}</div>
               </div>
             ))}
           </div>
-          <div className="text-[11px] text-slate-500 font-bold flex items-center gap-1.5"><ShieldCheck className="w-4 h-4" /> بيئة عمل رسمية ومؤمنة</div>
         </div>
         <form onSubmit={submit} className="p-8 space-y-4">
           <div>
@@ -143,7 +141,6 @@ function Login({ onDone }) {
             <input value={password} onChange={e => setPassword(e.target.value)} type="password" dir="ltr" className="mt-1 w-full border border-slate-300 rounded-lg px-4 py-3 font-bold outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200 transition text-left" />
           </div>
           <button disabled={loading} className="w-full py-3 rounded-lg bg-slate-900 text-white font-black hover:bg-slate-800 transition disabled:opacity-50">{loading ? 'جاري التحقق...' : 'دخول'}</button>
-          <p className="text-[11px] text-slate-400 font-bold bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">بيانات الدخول الأولى: <span dir="ltr" className="font-mono">admin / admin123</span> — يلزم تغييرها بعد أول دخول.</p>
         </form>
       </div>
     </div>
@@ -168,7 +165,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen">
-      <header className="bg-slate-900 text-white border-b-4 border-amber-400">
+      <header className="no-print bg-slate-900 text-white border-b-4 border-amber-400">
         <div className="max-w-6xl mx-auto px-4 md:px-6 py-4 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-white/10 border border-white/15 rounded-lg"><Palette className="w-5 h-5 text-amber-400" /></div>
@@ -344,13 +341,18 @@ function AttendanceView({ myTracks, myGrades }) {
         <StatCard label="غياب الأسبوع" value={stats.absent} tone="red" />
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-x-auto print-shadow-none">
-        <div className="bg-slate-900 text-white px-4 py-3 font-bold flex flex-wrap justify-between gap-2 border-b-2 border-amber-400">
+      <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-x-auto print-sheet print-shadow-none">
+        <div className="hidden print:block px-6 pt-5 pb-3 text-center">
+          <div className="font-black text-lg text-slate-900">منظومة الحضور والغياب — التربية الفنية</div>
+          <div className="font-bold text-sm text-slate-800 mt-1">كشف الحضور الأسبوعي — {myTracks.find(t => t.id === track)?.name} — {myGrades.find(g => g.id === gradeId)?.name}</div>
+          <div className="font-bold text-xs text-slate-600 mt-1">{week?.label} <span dir="ltr">({dates.length ? `${shortDM(dates[0])} - ${shortDM(dates[4])}` : ''})</span> — تاريخ الطباعة: <span dir="ltr">{todayStr()}</span></div>
+        </div>
+        <div className="no-print bg-slate-900 text-white px-4 py-3 font-bold flex flex-wrap justify-between gap-2 border-b-2 border-amber-400">
           <span className="text-sm">كشف الحضور الأسبوعي — {myTracks.find(t => t.id === track)?.name} — {myGrades.find(g => g.id === gradeId)?.name}</span>
           <span className="text-xs text-slate-300">{week?.label} <span dir="ltr">({dates.length ? `${shortDM(dates[0])} - ${shortDM(dates[4])}` : ''})</span></span>
         </div>
         {loading ? <div className="p-10 text-center font-bold text-slate-400">جاري تحميل الكشف...</div> : (
-          <table className="w-full text-sm min-w-[760px]">
+          <table className="att-table w-full text-sm min-w-[760px]">
             <thead>
               <tr className="text-[11px] text-slate-500 bg-slate-50 border-b border-slate-200">
                 <th className="p-2 w-10">#</th>
@@ -370,7 +372,7 @@ function AttendanceView({ myTracks, myGrades }) {
               {filtered.map((s, i) => (
                 <tr key={s.id} className="border-t border-slate-100 hover:bg-slate-50 transition">
                   <td className="p-2 text-center font-bold text-slate-300">{i + 1}</td>
-                  <td className="p-2"><span className="flex items-center gap-2"><span className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-sm shrink-0 ${avatarTones[s.id % avatarTones.length]}`}>{s.name.trim()[0]}</span><span className="font-bold text-slate-800">{s.name}</span></span></td>
+                  <td className="p-2"><span className="flex items-center gap-2"><span className={`print:hidden w-8 h-8 rounded-full flex items-center justify-center font-black text-sm shrink-0 ${avatarTones[s.id % avatarTones.length]}`}>{s.name.trim()[0]}</span><span className="font-bold text-slate-800">{s.name}</span></span></td>
                   {dates.map(d => {
                     const cur = grid[`${s.id}|${d}`];
                     return (
@@ -395,6 +397,12 @@ function AttendanceView({ myTracks, myGrades }) {
           <span className="bg-white border border-slate-200 px-3 py-1 rounded-md">الغياب: {stats.absent}</span>
           <span className="bg-white border border-slate-200 px-3 py-1 rounded-md">الطلاب: {stats.total}</span>
           {dirtyCount > 0 && <span className="no-print bg-amber-50 text-amber-800 border border-amber-300 px-3 py-1 rounded-md">تغييرات غير محفوظة: {dirtyCount}</span>}
+        </div>
+        <div className="hidden print:block px-6 py-4">
+          <div className="flex justify-between gap-6 text-xs font-bold text-slate-800">
+            <div className="text-center"><div>معلم المادة</div><div className="mt-8 border-t border-slate-400 pt-1 px-10">الاسم والتوقيع</div></div>
+            <div className="text-center"><div>إدارة المدرسة</div><div className="mt-8 border-t border-slate-400 pt-1 px-10">الختم والتوقيع</div></div>
+          </div>
         </div>
       </div>
     </div>

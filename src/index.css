@@ -76,6 +76,38 @@
     border-color: #e5e7eb !important;
   }
 
+  /* كشف الحضور الأسبوعي — طباعة رسمية نظيفة */
+  .print-sheet {
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    overflow: visible !important;
+  }
+  table.att-table {
+    min-width: 0 !important;
+    width: 100% !important;
+    border-collapse: collapse !important;
+    font-size: 12px !important;
+  }
+  table.att-table thead {
+    position: static !important;
+  }
+  table.att-table th,
+  table.att-table td {
+    border: 1px solid #444 !important;
+    padding: 5px 4px !important;
+  }
+  table.att-table thead th {
+    background: #f1f5f9 !important;
+    color: #000 !important;
+  }
+  table.att-table tbody tr {
+    background: #fff !important;
+  }
+  table.att-table .print-block {
+    font-size: 14px !important;
+  }
+
   /* Premium Report Utilities */
   .report-header-accent {
     border-right: 4px solid #4f46e5;
