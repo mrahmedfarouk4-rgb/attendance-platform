@@ -1,0 +1,12 @@
+node_modules
+.env
+dist
+.mypy_cache
+.venv
+.vite
+*.db
+*.zip
+*.rar
+PortableApp
+backend_python_old
+APP

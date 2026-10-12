@@ -1,0 +1,111 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Cairo", "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    direction: rtl;
+    font-family: var(--font-sans);
+  }
+  body {
+    background-color: #eef1f5;
+    min-height: 100vh;
+  }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up {
+  animation: fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: #c7d2fe; border-radius: 99px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+.bg-pattern {
+  background-color: #f8fafc;
+  background-image: radial-gradient(#e2e8f0 0.5px, transparent 0.5px);
+  background-size: 24px 24px;
+}
+
+.print-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: white;
+  overflow-y: auto;
+}
+
+@media print {
+  @page {
+    margin: 0.5cm;
+    size: A4;
+  }
+  
+  body {
+    background: white !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  /* Force print overlay to be static during print to allow multi-page */
+  .print-overlay {
+    position: static !important;
+    overflow: visible !important;
+    display: block !important;
+    padding: 0 !important;
+  }
+
+  .bg-pattern {
+    background-image: none !important;
+    background-color: white !important;
+  }
+
+  .print-shadow-none {
+    box-shadow: none !important;
+    border-color: #e5e7eb !important;
+  }
+
+  /* Premium Report Utilities */
+  .report-header-accent {
+    border-right: 4px solid #4f46e5;
+    padding-right: 15px;
+  }
+
+  .score-badge-premium {
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
+    color: white;
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.2);
+  }
+
+  .info-item-label {
+    font-size: 10px;
+    color: #94a3b8;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .info-item-value {
+    font-size: 13px;
+    color: #1e293b;
+    font-weight: 800;
+  }
+
+  .criterion-row:nth-child(even) {
+    background-color: #f8fafc;
+  }
+}

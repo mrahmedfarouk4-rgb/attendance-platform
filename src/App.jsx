@@ -1,0 +1,603 @@
+import { useState, useEffect, useMemo } from 'react';
+import { Palette, Users, ClipboardCheck, BarChart3, LogOut, Printer, Plus, Trash2, Save, Check, X, UserCog, KeyRound, CalendarDays, Search, ShieldCheck, GraduationCap, Music4, Drama, FileDown, FileUp, Building2 } from 'lucide-react';
+
+const api = async (path, { method = 'GET', body, token } = {}) => {
+  const t = token || localStorage.getItem('att_token');
+  const res = await fetch(path, {
+    method,
+    headers: { 'Content-Type': 'application/json', ...(t ? { Authorization: 'Bearer ' + t } : {}) },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'خطأ في الاتصال');
+  return data;
+};
+
+const todayStr = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
+const SEMESTER_SCHEDULE = [
+  { id: 1, label: 'الأسبوع الأول', startDay: 23, startMonth: 8, startYear: 2026 },
+  { id: 2, label: 'الأسبوع الثاني', startDay: 30, startMonth: 8, startYear: 2026 },
+  { id: 3, label: 'الأسبوع الثالث', startDay: 6, startMonth: 9, startYear: 2026 },
+  { id: 4, label: 'الأسبوع الرابع', startDay: 13, startMonth: 9, startYear: 2026 },
+  { id: 5, label: 'الأسبوع الخامس', startDay: 20, startMonth: 9, startYear: 2026 },
+  { id: 6, label: 'الأسبوع السادس', startDay: 27, startMonth: 9, startYear: 2026 },
+  { id: 7, label: 'الأسبوع السابع', startDay: 4, startMonth: 10, startYear: 2026 },
+  { id: 8, label: 'الأسبوع الثامن', startDay: 11, startMonth: 10, startYear: 2026 },
+  { id: 9, label: 'الأسبوع التاسع', startDay: 18, startMonth: 10, startYear: 2026 },
+  { id: 10, label: 'الأسبوع العاشر', startDay: 25, startMonth: 10, startYear: 2026 },
+  { id: 11, label: 'الأسبوع الحادي عشر', startDay: 1, startMonth: 11, startYear: 2026 },
+  { id: 12, label: 'الأسبوع الثاني عشر', startDay: 8, startMonth: 11, startYear: 2026 },
+  { id: 13, label: 'الأسبوع الثالث عشر', startDay: 15, startMonth: 11, startYear: 2026 },
+  { id: 14, label: 'الأسبوع الرابع عشر', startDay: 29, startMonth: 11, startYear: 2026 },
+  { id: 15, label: 'الأسبوع الخامس عشر', startDay: 6, startMonth: 12, startYear: 2026 },
+  { id: 16, label: 'الأسبوع السادس عشر', startDay: 13, startMonth: 12, startYear: 2026 },
+  { id: 17, label: 'الأسبوع السابع عشر', startDay: 20, startMonth: 12, startYear: 2026 },
+  { id: 18, label: 'الأسبوع الثامن عشر', startDay: 27, startMonth: 12, startYear: 2026 },
+  { id: 19, label: 'الأسبوع التاسع عشر', startDay: 3, startMonth: 1, startYear: 2027 },
+];
+const weekFirstISO = (w) => {
+  const d = new Date(w.startYear, w.startMonth - 1, w.startDay);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+const weekLastISO = (w) => {
+  const d = new Date(w.startYear, w.startMonth - 1, w.startDay + 4);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+const findWeekForDate = (iso) => {
+  const hit = SEMESTER_SCHEDULE.find(w => iso >= weekFirstISO(w) && iso <= weekLastISO(w));
+  if (hit) return hit.id;
+  if (iso < weekFirstISO(SEMESTER_SCHEDULE[0])) return SEMESTER_SCHEDULE[0].id;
+  return SEMESTER_SCHEDULE[SEMESTER_SCHEDULE.length - 1].id;
+};
+const weekRange = (w) => {
+  const a = new Date(w.startYear, w.startMonth - 1, w.startDay);
+  const b = new Date(a); b.setDate(a.getDate() + 4);
+  const f = (d) => `${d.getDate()}/${d.getMonth() + 1}`;
+  return `${f(a)} - ${f(b)}`;
+};
+const DAY_NAMES = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'];
+const shortDM = (iso) => { const [, m, d] = String(iso).split('-'); return `${parseInt(d, 10)}/${parseInt(m, 10)}`; };
+
+const statusLabel = { present: 'حاضر', absent: 'غائب', late: 'متأخر', excused: 'مستأذن' };
+const trackStyle = {
+  visual: { chip: 'bg-indigo-50 text-indigo-900 border-indigo-200', bar: 'bg-indigo-800', icon: <Palette className="w-5 h-5" /> },
+  performing: { chip: 'bg-rose-50 text-rose-900 border-rose-200', bar: 'bg-rose-800', icon: <Drama className="w-5 h-5" /> },
+  music: { chip: 'bg-teal-50 text-teal-900 border-teal-200', bar: 'bg-teal-800', icon: <Music4 className="w-5 h-5" /> },
+};
+const roleStyle = {
+  admin: 'bg-amber-100 text-amber-900 border border-amber-300',
+  supervisor: 'bg-indigo-100 text-indigo-900 border border-indigo-300',
+  teacher: 'bg-teal-100 text-teal-900 border border-teal-300',
+  developer: 'bg-slate-900 text-amber-400 border border-amber-400',
+};
+const roleLabel = { admin: 'مدير', supervisor: 'مشرف', teacher: 'معلم', developer: 'مطور المنصة' };
+const avatarTones = ['bg-slate-200 text-slate-700', 'bg-indigo-100 text-indigo-800', 'bg-teal-100 text-teal-800', 'bg-amber-100 text-amber-800', 'bg-rose-100 text-rose-800'];
+
+// استخراج الأسماء من ملف عام: JSON (مصفوفة أو كائن) أو CSV/TXT (سطر لكل اسم)
+function parseNamesFile(text) {
+  const t = String(text || '').trim();
+  if (!t) return [];
+  if (t[0] === '[' || t[0] === '{') {
+    const j = JSON.parse(t);
+    const arr = Array.isArray(j) ? j : j.students || j.names || j.data || [];
+    return [...new Set(arr.map(n => String(typeof n === 'object' ? (n?.name ?? '') : n).replace(/\s+/g, ' ').trim()).filter(Boolean))].slice(0, 500);
+  }
+  return [...new Set(t.split('\n').map(line => {
+    let v = String(line).trim().replace(/^["'\uFEFF]+|["']+$/g, '');
+    if (v.includes(',')) v = v.split(',')[0].trim().replace(/^["']|["']$/g, '');
+    return v.replace(/\s+/g, ' ').trim();
+  }).filter(v => v && !/^(الاسم|name|الطالب)$/i.test(v)))].slice(0, 500);
+}
+
+function Login({ onDone }) {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [err, setErr] = useState('');
+  const [loading, setLoading] = useState(false);
+  const submit = async (e) => {
+    e.preventDefault();
+    setErr(''); setLoading(true);
+    try {
+      const data = await api('/api/auth/login', { method: 'POST', body: { username, password } });
+      localStorage.setItem('att_token', data.token);
+      onDone(data);
+    } catch (e2) { setErr(e2.message); }
+    finally { setLoading(false); }
+  };
+  return (
+    <div className="min-h-screen flex items-center justify-center p-4 bg-slate-100">
+      <div className="w-full max-w-4xl grid md:grid-cols-2 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden animate-fade-up">
+        <div className="hidden md:flex flex-col justify-between p-8 text-white bg-slate-900">
+          <div>
+            <div className="flex items-center gap-2 text-amber-400 text-xs font-bold"><Building2 className="w-4 h-4" /> منظومة الحضور والغياب</div>
+            <h1 className="text-3xl font-black mt-3 leading-snug">التربية الفنية</h1>
+            <div className="w-16 h-1 bg-amber-400 rounded mt-3" />
+            <p className="text-slate-300 text-sm font-bold mt-3">الفنون البصرية — الفنون الأدائية — الموسيقى</p>
+          </div>
+          <div className="space-y-2">
+            {[['الفنون البصرية', 'الصفوف: الرابع، الخامس، الأول والثاني متوسط'], ['الفنون الأدائية', 'تسجيل أسبوعي وطباعة الكشوف'], ['الموسيقى', 'تقارير ونسب حضور معتمدة']].map(([t, d]) => (
+              <div key={t} className="border-r-2 border-amber-400 pr-3 py-1">
+                <div className="font-bold text-sm">{t}</div>
+                <div className="text-[11px] text-slate-400 font-bold">{d}</div>
+              </div>
+            ))}
+          </div>
+          <div className="text-[11px] text-slate-500 font-bold flex items-center gap-1.5"><ShieldCheck className="w-4 h-4" /> بيئة عمل رسمية ومؤمنة</div>
+        </div>
+        <form onSubmit={submit} className="p-8 space-y-4">
+          <div>
+            <h2 className="font-black text-xl text-slate-900">تسجيل الدخول</h2>
+            <p className="text-xs text-slate-500 font-bold mt-1">أدخل بيانات الاعتماد الخاصة بك للمتابعة</p>
+          </div>
+          {err && <div className="bg-rose-50 border border-rose-200 text-rose-800 text-sm font-bold rounded-lg px-4 py-2.5">{err}</div>}
+          <div>
+            <label className="text-xs font-bold text-slate-600">اسم المستخدم</label>
+            <input value={username} onChange={e => setUsername(e.target.value)} autoFocus dir="ltr" className="mt-1 w-full border border-slate-300 rounded-lg px-4 py-3 font-bold outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200 transition text-left" />
+          </div>
+          <div>
+            <label className="text-xs font-bold text-slate-600">كلمة المرور</label>
+            <input value={password} onChange={e => setPassword(e.target.value)} type="password" dir="ltr" className="mt-1 w-full border border-slate-300 rounded-lg px-4 py-3 font-bold outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200 transition text-left" />
+          </div>
+          <button disabled={loading} className="w-full py-3 rounded-lg bg-slate-900 text-white font-black hover:bg-slate-800 transition disabled:opacity-50">{loading ? 'جاري التحقق...' : 'دخول'}</button>
+          <p className="text-[11px] text-slate-400 font-bold bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">بيانات الدخول الأولى: <span dir="ltr" className="font-mono">admin / admin123</span> — يلزم تغييرها بعد أول دخول.</p>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+export default function App() {
+  const [auth, setAuth] = useState(null);
+  const [view, setView] = useState('attendance');
+
+  useEffect(() => {
+    const t = localStorage.getItem('att_token');
+    if (!t) return;
+    api('/api/auth/me', {}).then(setAuth).catch(() => localStorage.removeItem('att_token'));
+  }, []);
+
+  if (!auth) return <Login onDone={setAuth} />;
+
+  const { user, tracks, grades } = auth;
+  const myTracks = user.role === 'teacher' ? tracks.filter(t => user.allowedTracks.includes(t.id)) : tracks;
+  const myGrades = user.role === 'teacher' ? grades.filter(g => user.allowedGrades.includes(g.id)) : grades;
+
+  return (
+    <div className="min-h-screen">
+      <header className="bg-slate-900 text-white border-b-4 border-amber-400">
+        <div className="max-w-6xl mx-auto px-4 md:px-6 py-4 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-white/10 border border-white/15 rounded-lg"><Palette className="w-5 h-5 text-amber-400" /></div>
+            <div>
+              <h1 className="font-black text-base md:text-lg leading-tight">منظومة الحضور والغياب — التربية الفنية</h1>
+              <p className="text-[11px] text-slate-400 font-bold">الفنون البصرية — الأدائية — الموسيقى</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className={`text-[11px] font-black px-3 py-1 rounded-full ${roleStyle[user.role]}`}>{roleLabel[user.role]}</span>
+            <span className="text-xs font-bold text-slate-200">{user.displayName}</span>
+            <button onClick={() => { localStorage.removeItem('att_token'); location.reload(); }} className="no-print flex items-center gap-1.5 text-[11px] font-bold text-slate-300 hover:text-white border border-white/20 hover:border-white/40 px-3 py-1.5 rounded-lg transition"><LogOut className="w-3.5 h-3.5" />خروج</button>
+          </div>
+        </div>
+      </header>
+
+      <div className="max-w-6xl mx-auto px-4 md:px-6 py-5">
+        <nav className="no-print bg-white rounded-xl shadow-sm border border-slate-200 p-1.5 flex gap-1 overflow-x-auto mb-5">
+          <NavBtn active={view === 'attendance'} onClick={() => setView('attendance')} icon={<ClipboardCheck className="w-4 h-4" />} label="تسجيل الحضور" />
+          <NavBtn active={view === 'reports'} onClick={() => setView('reports')} icon={<BarChart3 className="w-4 h-4" />} label="التقارير" />
+          {(user.role === 'admin' || user.role === 'supervisor') && <NavBtn active={view === 'students'} onClick={() => setView('students')} icon={<Users className="w-4 h-4" />} label="الطلاب" />}
+          {(user.role === 'admin' || user.role === 'developer') && <NavBtn active={view === 'users'} onClick={() => setView('users')} icon={<UserCog className="w-4 h-4" />} label="المستخدمون" />}
+          <NavBtn active={view === 'password'} onClick={() => setView('password')} icon={<KeyRound className="w-4 h-4" />} label="كلمة المرور" />
+        </nav>
+
+        <div className="animate-fade-up" key={view}>
+          {view === 'attendance' && <AttendanceView myTracks={myTracks} myGrades={myGrades} />}
+          {view === 'reports' && <ReportsView myTracks={myTracks} myGrades={myGrades} tracks={tracks} grades={grades} />}
+          {view === 'students' && <StudentsView grades={grades} />}
+          {view === 'users' && (user.role === 'admin' || user.role === 'developer') && <UsersView tracks={tracks} grades={grades} me={user} />}
+          {view === 'password' && <PasswordView />}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function NavBtn({ active, onClick, icon, label }) {
+  return <button onClick={onClick} className={`flex items-center gap-1.5 text-xs font-bold px-4 py-2.5 rounded-lg transition whitespace-nowrap ${active ? 'bg-slate-900 text-white' : 'text-slate-500 hover:bg-slate-100'}`}>{icon}{label}</button>;
+}
+
+function StatCard({ label, value, sub, tone }) {
+  const tones = {
+    dark: 'bg-slate-900 text-white',
+    green: 'bg-emerald-700 text-white',
+    red: 'bg-rose-700 text-white',
+    gold: 'bg-amber-500 text-slate-900',
+  };
+  return (
+    <div className={`rounded-xl p-4 border border-slate-200 shadow-sm ${tones[tone] || tones.dark}`}>
+      <div className="text-[11px] font-bold opacity-80">{label}</div>
+      <div className="text-2xl font-black">{value}</div>
+      {sub && <div className="text-[11px] font-bold opacity-75 mt-0.5">{sub}</div>}
+    </div>
+  );
+}
+
+// ---------- تسجيل الحضور (شبكة أسبوعية) ----------
+function AttendanceView({ myTracks, myGrades }) {
+  const [track, setTrack] = useState(myTracks[0]?.id || '');
+  const [gradeId, setGradeId] = useState(myGrades[0]?.id || '');
+  const [weekId, setWeekId] = useState(() => findWeekForDate(todayStr()));
+  const [dates, setDates] = useState([]);
+  const [students, setStudents] = useState([]);
+  const [grid, setGrid] = useState({});
+  const [dirty, setDirty] = useState({});
+  const [q, setQ] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState('');
+
+  const load = async () => {
+    if (!track || !gradeId || !weekId) return;
+    setLoading(true); setMsg('');
+    try {
+      const st = await api(`/api/attendance/students?gradeId=${gradeId}`);
+      setStudents(st);
+      const wk = await api(`/api/attendance/week?weekId=${weekId}&track=${track}&gradeId=${gradeId}`);
+      setDates(wk.dates);
+      const m = {};
+      wk.records.forEach(r => { m[`${r.studentId}|${r.date}`] = r.status; });
+      setGrid(m);
+      setDirty({});
+    } catch (e) { setMsg(e.message); }
+    finally { setLoading(false); }
+  };
+  useEffect(() => { load(); }, [track, gradeId, weekId]);
+
+  const toggle = (sid, date, type) => {
+    const k = `${sid}|${date}`;
+    setGrid(prev => {
+      const cur = prev[k];
+      const next = cur === type ? null : type;
+      setDirty(d => ({ ...d, [k]: next }));
+      if (next === null) { const n = { ...prev }; delete n[k]; return n; }
+      return { ...prev, [k]: next };
+    });
+  };
+  const markDayAll = (date, type) => {
+    setGrid(prev => {
+      const n = { ...prev };
+      const d = {};
+      students.forEach(s => { const k = `${s.id}|${date}`; n[k] = type; d[k] = type; });
+      setDirty(old => ({ ...old, ...d }));
+      return n;
+    });
+  };
+
+  const filtered = useMemo(() => students.filter(s => s.name.includes(q.trim())), [students, q]);
+  const stats = useMemo(() => {
+    const vals = Object.values(grid);
+    return { total: students.length, present: vals.filter(v => v === 'present').length, absent: vals.filter(v => v === 'absent').length };
+  }, [grid, students]);
+  const dirtyCount = Object.keys(dirty).length;
+  const week = SEMESTER_SCHEDULE.find(w => w.id === weekId);
+  const tCfg = trackStyle[track] || trackStyle.visual;
+  const currentWeekId = findWeekForDate(todayStr());
+
+  const save = async () => {
+    const records = Object.entries(dirty).map(([k, status]) => {
+      const [sid, date] = k.split('|');
+      return { date, studentId: parseInt(sid, 10), status };
+    });
+    if (!records.length) { setMsg('لا توجد تغييرات للحفظ'); return; }
+    setSaving(true); setMsg('');
+    try {
+      const r = await api('/api/attendance/week', { method: 'POST', body: { track, gradeId, records } });
+      setMsg(`تم الحفظ — ${r.saved} تسجيل${r.deleted ? ` — حُذف ${r.deleted}` : ''} (${week?.label})`);
+      setDirty({});
+    } catch (e) { setMsg(e.message); }
+    finally { setSaving(false); }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="no-print grid md:grid-cols-3 gap-3">
+        {myTracks.map(t => {
+          const c = trackStyle[t.id] || trackStyle.visual;
+          const on = track === t.id;
+          return (
+            <button key={t.id} onClick={() => setTrack(t.id)} className={`flex items-center gap-3 rounded-xl p-4 border text-right transition bg-white ${on ? 'border-slate-900 shadow-md border-r-4' : 'border-slate-200 hover:border-slate-400'}`}>
+              <span className={`p-2.5 rounded-lg border ${c.chip}`}>{c.icon}</span>
+              <span><span className="block font-black text-sm text-slate-900">{t.name}</span>
+              <span className="block text-[11px] font-bold text-slate-400">{on ? 'المادة المحددة' : 'اضغط للتبديل'}</span></span>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="no-print bg-white rounded-xl shadow-sm border border-slate-200 p-4 space-y-3">
+        <div className="flex flex-wrap gap-2">
+          {myGrades.map(g => <button key={g.id} onClick={() => setGradeId(g.id)} className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold border transition ${gradeId === g.id ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'}`}><GraduationCap className="w-4 h-4" />{g.name}</button>)}
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5">
+            <button onClick={() => setWeekId(w => Math.max(1, w - 1))} disabled={weekId <= 1} className="px-2 py-1 font-black text-slate-700 disabled:opacity-30">‹</button>
+            <select value={weekId} onChange={e => setWeekId(parseInt(e.target.value, 10))} className="bg-transparent outline-none text-xs font-bold max-w-[220px] text-slate-800">
+              {SEMESTER_SCHEDULE.map(w => <option key={w.id} value={w.id}>{w.label} ({weekRange(w)}){w.id === currentWeekId ? ' — الحالي' : ''}</option>)}
+            </select>
+            <button onClick={() => setWeekId(w => Math.min(19, w + 1))} disabled={weekId >= 19} className="px-2 py-1 font-black text-slate-700 disabled:opacity-30">›</button>
+            {weekId !== currentWeekId && <button onClick={() => setWeekId(currentWeekId)} className="text-[10px] font-bold bg-slate-900 text-white px-2 py-1 rounded-md">الأسبوع الحالي</button>}
+          </div>
+          <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 flex-1 min-w-[160px]"><Search className="w-4 h-4 text-slate-400" /><input value={q} onChange={e => setQ(e.target.value)} placeholder="بحث باسم الطالب..." className="bg-transparent outline-none text-sm font-bold w-full" /></div>
+          <button onClick={save} disabled={saving || !dirtyCount} className="flex items-center gap-1.5 text-sm font-black text-white px-5 py-2 rounded-lg bg-emerald-700 hover:bg-emerald-800 transition disabled:opacity-40"><Save className="w-4 h-4" />{saving ? 'جاري الحفظ...' : `حفظ الأسبوع${dirtyCount ? ` (${dirtyCount})` : ''}`}</button>
+          <button onClick={() => window.print()} className="flex items-center gap-1.5 text-sm font-bold bg-slate-900 text-white px-4 py-2 rounded-lg hover:bg-slate-800"><Printer className="w-4 h-4" />طباعة</button>
+        </div>
+        {msg && <div className="text-xs font-bold text-slate-700 bg-slate-100 border border-slate-200 rounded-lg px-3 py-2">{msg}</div>}
+      </div>
+
+      <div className="no-print grid grid-cols-3 gap-3">
+        <StatCard label="طلاب الصف" value={stats.total} sub={`${filtered.length} ظاهر`} tone="dark" />
+        <StatCard label="حضور الأسبوع" value={stats.present} tone="green" />
+        <StatCard label="غياب الأسبوع" value={stats.absent} tone="red" />
+      </div>
+
+      <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-x-auto print-shadow-none">
+        <div className="bg-slate-900 text-white px-4 py-3 font-bold flex flex-wrap justify-between gap-2 border-b-2 border-amber-400">
+          <span className="text-sm">كشف الحضور الأسبوعي — {myTracks.find(t => t.id === track)?.name} — {myGrades.find(g => g.id === gradeId)?.name}</span>
+          <span className="text-xs text-slate-300">{week?.label} <span dir="ltr">({dates.length ? `${shortDM(dates[0])} - ${shortDM(dates[4])}` : ''})</span></span>
+        </div>
+        {loading ? <div className="p-10 text-center font-bold text-slate-400">جاري تحميل الكشف...</div> : (
+          <table className="w-full text-sm min-w-[760px]">
+            <thead>
+              <tr className="text-[11px] text-slate-500 bg-slate-50 border-b border-slate-200">
+                <th className="p-2 w-10">#</th>
+                <th className="p-2 text-right min-w-[150px]">اسم الطالب</th>
+                {dates.map((d, i) => (
+                  <th key={d} className="p-2 border-r border-slate-100">
+                    <div className="flex flex-col items-center gap-0.5">
+                      <span className="font-bold text-slate-700">{DAY_NAMES[i]}</span>
+                      <span dir="ltr" className="text-[10px] font-bold text-slate-500">{shortDM(d)}</span>
+                      <button onClick={() => markDayAll(d, 'present')} title="تحديد الكل حاضر لهذا اليوم" className="no-print text-[10px] font-bold text-emerald-700 hover:underline">الكل حاضر</button>
+                    </div>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((s, i) => (
+                <tr key={s.id} className="border-t border-slate-100 hover:bg-slate-50 transition">
+                  <td className="p-2 text-center font-bold text-slate-300">{i + 1}</td>
+                  <td className="p-2"><span className="flex items-center gap-2"><span className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-sm shrink-0 ${avatarTones[s.id % avatarTones.length]}`}>{s.name.trim()[0]}</span><span className="font-bold text-slate-800">{s.name}</span></span></td>
+                  {dates.map(d => {
+                    const cur = grid[`${s.id}|${d}`];
+                    return (
+                      <td key={d} className="p-1.5 text-center border-r border-slate-100">
+                        <div className="no-print flex justify-center gap-1">
+                          <button onClick={() => toggle(s.id, d, 'present')} title="حاضر" className={`w-9 h-9 rounded-md border font-black text-sm transition ${cur === 'present' ? 'bg-emerald-600 border-emerald-700 text-white' : 'bg-white border-slate-300 text-slate-400 hover:border-emerald-500'}`}>ح</button>
+                          <button onClick={() => toggle(s.id, d, 'absent')} title="غائب" className={`w-9 h-9 rounded-md border font-black text-sm transition ${cur === 'absent' ? 'bg-rose-600 border-rose-700 text-white' : 'bg-white border-slate-300 text-slate-400 hover:border-rose-500'}`}>غ</button>
+                        </div>
+                        {(cur === 'late' || cur === 'excused') && <div className="no-print text-[10px] font-bold text-amber-700 mt-0.5">{cur === 'late' ? 'متأخر' : 'مستأذن'}</div>}
+                        <div className="hidden print:block font-black text-slate-900">{cur === 'present' ? 'ح' : cur === 'absent' ? 'غ' : cur === 'late' ? 'م' : cur === 'excused' ? 'ع' : '—'}</div>
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+              {!filtered.length && <tr><td colSpan={7} className="p-10 text-center text-slate-400 font-bold">{students.length ? 'لا نتائج مطابقة للبحث' : 'لا يوجد طلاب في هذا الصف — أضفهم من صفحة الطلاب'}</td></tr>}
+            </tbody>
+          </table>
+        )}
+        <div className="px-4 py-3 border-t border-slate-200 bg-slate-50 flex flex-wrap gap-2 text-xs font-bold text-slate-600">
+          <span className="bg-white border border-slate-200 px-3 py-1 rounded-md">الحضور: {stats.present}</span>
+          <span className="bg-white border border-slate-200 px-3 py-1 rounded-md">الغياب: {stats.absent}</span>
+          <span className="bg-white border border-slate-200 px-3 py-1 rounded-md">الطلاب: {stats.total}</span>
+          {dirtyCount > 0 && <span className="no-print bg-amber-50 text-amber-800 border border-amber-300 px-3 py-1 rounded-md">تغييرات غير محفوظة: {dirtyCount}</span>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------- التقارير ----------
+function ReportsView({ myTracks, myGrades, tracks, grades }) {
+  const [from, setFrom] = useState(todayStr().slice(0, 8) + '01');
+  const [to, setTo] = useState(todayStr());
+  const [track, setTrack] = useState('');
+  const [gradeId, setGradeId] = useState('');
+  const [rows, setRows] = useState([]);
+  const [msg, setMsg] = useState('');
+  const tName = (id) => tracks.find(t => t.id === id)?.name || id;
+  const gName = (id) => grades.find(g => g.id === id)?.name || id;
+  const avg = rows.length ? Math.round(rows.reduce((a, r) => a + r.rate, 0) / rows.length) : 0;
+
+  const run = async () => {
+    setMsg('');
+    try {
+      const q = new URLSearchParams({ from, to });
+      if (track) q.set('track', track);
+      if (gradeId) q.set('gradeId', gradeId);
+      const data = await api('/api/attendance/report?' + q.toString());
+      setRows(data.rows);
+      setMsg(`السجلات: ${data.count} — الطلاب: ${data.rows.length}`);
+    } catch (e) { setMsg(e.message); }
+  };
+  useEffect(() => { run(); }, []);
+
+  const csv = () => {
+    const head = 'الطالب,المادة,الصف,حاضر,غائب,متأخر,مستأذن,الإجمالي,النسبة%';
+    const lines = rows.map(r => [r.studentName, tName(r.track), gName(r.gradeId), r.present, r.absent, r.late, r.excused, r.total, r.rate].join(','));
+    const blob = new Blob(['\ufeff' + head + '\n' + lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `تقرير_الحضور_${from}_${to}.csv`; a.click();
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="no-print bg-white border border-slate-200 rounded-xl shadow-sm p-4 flex flex-wrap items-end gap-3">
+        <label className="text-[11px] font-bold text-slate-500">من:<input type="date" value={from} onChange={e => setFrom(e.target.value)} className="block border border-slate-300 rounded-lg px-3 py-1.5 font-bold mt-1 text-slate-800" /></label>
+        <label className="text-[11px] font-bold text-slate-500">إلى:<input type="date" value={to} onChange={e => setTo(e.target.value)} className="block border border-slate-300 rounded-lg px-3 py-1.5 font-bold mt-1 text-slate-800" /></label>
+        <label className="text-[11px] font-bold text-slate-500">المادة:<select value={track} onChange={e => setTrack(e.target.value)} className="block border border-slate-300 rounded-lg px-3 py-1.5 font-bold mt-1 text-slate-800"><option value="">الكل</option>{myTracks.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}</select></label>
+        <label className="text-[11px] font-bold text-slate-500">الصف:<select value={gradeId} onChange={e => setGradeId(e.target.value)} className="block border border-slate-300 rounded-lg px-3 py-1.5 font-bold mt-1 text-slate-800"><option value="">الكل</option>{myGrades.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}</select></label>
+        <button onClick={run} className="bg-slate-900 text-white text-sm font-bold px-6 py-2 rounded-lg">عرض التقرير</button>
+        <button onClick={csv} className="flex items-center gap-1.5 bg-emerald-700 text-white text-sm font-bold px-4 py-2 rounded-lg"><FileDown className="w-4 h-4" />تصدير CSV</button>
+        <button onClick={() => window.print()} className="bg-white border border-slate-300 text-slate-700 text-sm font-bold px-4 py-2 rounded-lg">طباعة</button>
+        {msg && <span className="text-[11px] font-bold text-slate-400">{msg}</span>}
+      </div>
+      <div className="no-print grid grid-cols-3 gap-3">
+        <StatCard label="عدد الطلاب" value={rows.length} tone="dark" />
+        <StatCard label="متوسط الحضور" value={avg + '%'} tone="green" />
+        <StatCard label="الفترة" value="مخصصة" sub={`${from} ← ${to}`} tone="gold" />
+      </div>
+      <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+        <div className="px-4 py-3 font-bold text-slate-900 border-b border-slate-200 text-sm">تقرير الحضور <span className="text-slate-400 text-xs font-bold">({from} ← {to})</span></div>
+        <table className="w-full text-sm">
+          <thead><tr className="text-[11px] text-slate-500 bg-slate-50 border-b border-slate-200"><th className="p-3 text-right">الطالب</th><th className="p-3">المادة</th><th className="p-3">الصف</th><th className="p-3">حاضر</th><th className="p-3">غائب</th><th className="p-3">النسبة</th></tr></thead>
+          <tbody>{rows.map((r, i) => (
+            <tr key={i} className="border-t border-slate-100 hover:bg-slate-50">
+              <td className="p-3 font-bold text-slate-800">{r.studentName}</td>
+              <td className="p-3 text-center text-xs font-bold text-slate-600">{tName(r.track)}</td>
+              <td className="p-3 text-center text-[11px] text-slate-500 font-bold">{gName(r.gradeId)}</td>
+              <td className="p-3 text-center text-emerald-700 font-black">{r.present}</td>
+              <td className="p-3 text-center text-rose-700 font-black">{r.absent}</td>
+              <td className="p-3"><div className="flex items-center gap-2"><div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden"><div className={`h-full rounded-full ${r.rate >= 85 ? 'bg-emerald-600' : r.rate >= 60 ? 'bg-amber-500' : 'bg-rose-600'}`} style={{ width: r.rate + '%' }} /></div><span className="font-black text-xs w-10 text-slate-700">{r.rate}%</span></div></td>
+            </tr>))}
+            {!rows.length && <tr><td colSpan={6} className="p-10 text-center text-slate-400 font-bold">لا توجد بيانات في الفترة المحددة</td></tr>}</tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+// ---------- الطلاب ----------
+function StudentsView({ grades }) {
+  const [gradeId, setGradeId] = useState('grade4');
+  const [list, setList] = useState([]);
+  const [name, setName] = useState('');
+  const [bulk, setBulk] = useState('');
+  const [msg, setMsg] = useState('');
+  const [fileMsg, setFileMsg] = useState('');
+  const [fileBusy, setFileBusy] = useState(false);
+  const load = async (g = gradeId) => {
+    try { setList(await api(`/api/attendance/students?gradeId=${g}`)); } catch (e) { setMsg(e.message); }
+  };
+  useEffect(() => { load(); }, [gradeId]);
+  const add = async () => {
+    if (!name.trim()) return;
+    try { await api('/api/attendance/students', { method: 'POST', body: { name: name.trim(), gradeId } }); setName(''); load(); } catch (e) { setMsg(e.message); }
+  };
+  const addBulk = async () => {
+    const names = bulk.split('\n').map(s => s.trim()).filter(Boolean);
+    if (!names.length) return;
+    try { const r = await api('/api/attendance/students/bulk', { method: 'POST', body: { gradeId, names } }); setMsg(`تمت إضافة ${r.added} — مكرر: ${r.skipped}`); setBulk(''); load(); } catch (e) { setMsg(e.message); }
+  };
+  const importFile = async (e) => {
+    const f = e.target.files?.[0];
+    e.target.value = '';
+    if (!f) return;
+    setFileBusy(true); setFileMsg('جاري قراءة الملف...');
+    try {
+      const names = parseNamesFile(await f.text());
+      if (!names.length) throw new Error('لم يتم العثور على أسماء في الملف');
+      const r = await api('/api/attendance/students/bulk', { method: 'POST', body: { gradeId, names } });
+      setFileMsg(`تم الاستيراد — جديد: ${r.added} — مكرر: ${r.skipped} (من ${names.length} اسم)`);
+      load();
+    } catch (err) { setFileMsg(err.message); }
+    finally { setFileBusy(false); }
+  };
+  const del = async (id) => {
+    if (!confirm('حذف الطالب وسجلات حضوره نهائياً؟')) return;
+    try { await api(`/api/attendance/students/${id}`, { method: 'DELETE' }); load(); } catch (e) { setMsg(e.message); }
+  };
+  return (
+    <div className="space-y-4">
+      <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-4 space-y-3">
+        <div className="flex flex-wrap gap-2">{grades.map(g => <button key={g.id} onClick={() => setGradeId(g.id)} className={`px-4 py-2 rounded-lg text-xs font-bold border transition ${gradeId === g.id ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'}`}>{g.name} <span className="opacity-60">({list.length})</span></button>)}</div>
+        <div className="flex gap-2"><input value={name} onChange={e => setName(e.target.value)} onKeyDown={e => e.key === 'Enter' && add()} placeholder="اسم طالب جديد..." className="flex-1 border border-slate-300 rounded-lg px-3 py-2 font-bold outline-none focus:border-slate-900" /><button onClick={add} className="flex items-center gap-1 bg-slate-900 text-white text-sm font-bold px-5 py-2 rounded-lg"><Plus className="w-4 h-4" />إضافة</button></div>
+        <div className="flex gap-2"><textarea value={bulk} onChange={e => setBulk(e.target.value)} rows={3} placeholder="لصق جماعي — كل اسم في سطر مستقل" className="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm font-bold outline-none focus:border-slate-900" /><button onClick={addBulk} className="bg-emerald-700 text-white text-sm font-bold px-5 py-2 rounded-lg h-fit">لصق جماعي</button></div>
+        <div className="flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
+          <label className={`flex items-center gap-1.5 text-xs font-bold px-4 py-2 rounded-lg cursor-pointer transition border ${fileBusy ? 'bg-slate-100 text-slate-400 border-slate-200' : 'bg-white text-slate-700 border-slate-300 hover:border-slate-900'}`}><FileUp className="w-4 h-4" />{fileBusy ? 'جاري الاستيراد...' : 'استيراد ملف (CSV / JSON)'}<input type="file" accept=".json,.csv,.txt" className="hidden" onChange={importFile} disabled={fileBusy} /></label>
+          <span className="text-[11px] text-slate-400 font-bold">ملف بأسماء الطلاب — كل اسم في سطر، إلى الصف الحالي</span>
+        </div>
+        {(fileMsg || msg) && <div className="text-xs font-bold text-slate-700 bg-slate-100 border border-slate-200 rounded-lg px-3 py-2">{fileMsg || msg}</div>}
+      </div>
+      <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+        {list.map((s, i) => <div key={s.id} className="flex items-center justify-between border-t first:border-0 border-slate-100 px-4 py-2.5 hover:bg-slate-50"><span className="font-bold text-sm flex items-center gap-2.5 text-slate-800"><span className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-sm ${avatarTones[s.id % avatarTones.length]}`}>{s.name.trim()[0]}</span>{i + 1}. {s.name}</span><button onClick={() => del(s.id)} className="text-rose-600 hover:bg-rose-50 p-2 rounded-lg transition"><Trash2 className="w-4 h-4" /></button></div>)}
+        {!list.length && <div className="p-10 text-center text-slate-400 font-bold">لا يوجد طلاب بعد</div>}
+      </div>
+    </div>
+  );
+}
+
+// ---------- المستخدمون ----------
+function UsersView({ tracks, grades, me }) {
+  const isDev = me?.role === 'developer';
+  const [list, setList] = useState([]);
+  const [form, setForm] = useState({ username: '', password: '', displayName: '', role: 'teacher', allowedTracks: ['visual'], allowedGrades: ['grade4'] });
+  const [msg, setMsg] = useState('');
+  const load = async () => { try { setList(await api('/api/auth/users')); } catch (e) { setMsg(e.message); } };
+  useEffect(() => { load(); }, []);
+  const toggle = (key, id) => setForm(f => ({ ...f, [key]: f[key].includes(id) ? f[key].filter(x => x !== id) : [...f[key], id] }));
+  const create = async () => {
+    try { await api('/api/auth/users', { method: 'POST', body: form }); setMsg('تم إنشاء الحساب بنجاح'); setForm({ username: '', password: '', displayName: '', role: 'teacher', allowedTracks: ['visual'], allowedGrades: ['grade4'] }); load(); }
+    catch (e) { setMsg(e.message); }
+  };
+  const remove = async (id) => { if (!confirm('حذف المستخدم نهائياً؟')) return; try { await api(`/api/auth/users/${id}`, { method: 'DELETE' }); load(); } catch (e) { setMsg(e.message); } };
+  const setActive = async (u) => { try { await api(`/api/auth/users/${u.id}`, { method: 'PATCH', body: { active: !u.active } }); load(); } catch (e) { setMsg(e.message); } };
+  const resetPw = async (u) => { const p = prompt(`كلمة مرور جديدة لـ ${u.username} (6 أحرف على الأقل)`); if (!p) return; try { await api(`/api/auth/users/${u.id}`, { method: 'PATCH', body: { password: p } }); setMsg('تم تعيين كلمة المرور'); } catch (e) { setMsg(e.message); } };
+  return (
+    <div className="space-y-4">
+      <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-5 space-y-3">
+        <h3 className="font-black text-slate-900 flex items-center gap-2 text-sm"><UserCog className="w-5 h-5" />إنشاء حساب جديد</h3>
+        <div className="grid md:grid-cols-4 gap-2">
+          <input value={form.username} onChange={e => setForm({ ...form, username: e.target.value })} placeholder="اسم المستخدم" dir="ltr" className="border border-slate-300 rounded-lg px-3 py-2 font-bold outline-none focus:border-slate-900 text-left" />
+          <input value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} placeholder="كلمة المرور" dir="ltr" className="border border-slate-300 rounded-lg px-3 py-2 font-bold outline-none focus:border-slate-900 text-left" />
+          <input value={form.displayName} onChange={e => setForm({ ...form, displayName: e.target.value })} placeholder="الاسم المعروض" className="border border-slate-300 rounded-lg px-3 py-2 font-bold outline-none focus:border-slate-900" />
+          <select value={form.role} onChange={e => setForm({ ...form, role: e.target.value })} className="border border-slate-300 rounded-lg px-3 py-2 font-bold text-slate-800"><option value="teacher">معلم</option><option value="supervisor">مشرف</option><option value="admin">مدير</option>{isDev && <option value="developer">مطور المنصة</option>}</select>
+        </div>
+        <div className="text-xs font-bold text-slate-600">المواد:<div className="flex gap-1.5 mt-1.5 flex-wrap">{tracks.map(t => <button key={t.id} onClick={() => toggle('allowedTracks', t.id)} className={`px-3.5 py-1.5 rounded-lg border text-xs font-bold transition ${form.allowedTracks.includes(t.id) ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'}`}>{t.icon} {t.name}</button>)}</div></div>
+        <div className="text-xs font-bold text-slate-600">الصفوف:<div className="flex gap-1.5 mt-1.5 flex-wrap">{grades.map(g => <button key={g.id} onClick={() => toggle('allowedGrades', g.id)} className={`px-3.5 py-1.5 rounded-lg border text-xs font-bold transition ${form.allowedGrades.includes(g.id) ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'}`}>{g.short}</button>)}</div></div>
+        <button onClick={create} className="flex items-center gap-1.5 bg-slate-900 text-white text-sm font-bold px-6 py-2.5 rounded-lg"><Check className="w-4 h-4" />إنشاء الحساب</button>
+        {msg && <div className="text-xs font-bold text-slate-700 bg-slate-100 border border-slate-200 rounded-lg px-3 py-2">{msg}</div>}
+      </div>
+      <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+        {list.map(u => (
+          <div key={u.id} className="flex flex-wrap items-center justify-between gap-2 border-t first:border-0 border-slate-100 px-4 py-3 hover:bg-slate-50">
+            <div className="flex items-center gap-3"><span className={`w-10 h-10 rounded-full flex items-center justify-center font-black ${avatarTones[u.id % avatarTones.length]}`}>{u.displayName.trim()[0]}</span>
+              <div><div className="font-black text-sm text-slate-900">{u.displayName} <span className="text-[11px] text-slate-400 font-mono" dir="ltr">@{u.username}</span> <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${roleStyle[u.role]}`}>{roleLabel[u.role]}</span></div>
+              <div className="text-[11px] text-slate-500 font-bold">المواد: {(u.allowedTracks.length ? u.allowedTracks : ['الكل']).join('،')} — الصفوف: {(u.allowedGrades.length ? u.allowedGrades : ['الكل']).join('،')} — {u.active ? 'نشط' : 'موقوف'}</div></div></div>
+            <div className="flex gap-1.5">
+              {(u.role === 'admin' || u.role === 'developer') && !isDev ? (
+                <span className="text-[11px] font-bold text-slate-400">إدارة هذا الحساب للمطور فقط</span>
+              ) : (
+                <>
+              <button onClick={() => setActive(u)} className="text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg">{u.active ? 'إيقاف' : 'تفعيل'}</button>
+              <button onClick={() => resetPw(u)} className="text-xs font-bold bg-white border border-slate-300 hover:border-slate-500 text-slate-700 px-3 py-1.5 rounded-lg">تعيين كلمة</button>
+              <button onClick={() => remove(u.id)} className="text-xs font-bold bg-white border border-rose-300 text-rose-700 hover:bg-rose-50 px-3 py-1.5 rounded-lg"><X className="w-3 h-3 inline" />حذف</button>
+                </>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function PasswordView() {
+  const [o, setO] = useState(''); const [n, setN] = useState(''); const [msg, setMsg] = useState('');
+  const save = async () => {
+    try { await api('/api/auth/change-password', { method: 'POST', body: { oldPassword: o, newPassword: n } }); setMsg('تم تغيير كلمة المرور بنجاح'); setO(''); setN(''); }
+    catch (e) { setMsg(e.message); }
+  };
+  return (
+    <div className="max-w-md bg-white border border-slate-200 rounded-xl shadow-sm p-6 space-y-3">
+      <h3 className="font-black text-slate-900 flex items-center gap-2 text-sm"><KeyRound className="w-5 h-5" />تغيير كلمة المرور</h3>
+      <input value={o} onChange={e => setO(e.target.value)} type="password" placeholder="كلمة المرور الحالية" className="w-full border border-slate-300 rounded-lg px-3 py-2.5 font-bold outline-none focus:border-slate-900" />
+      <input value={n} onChange={e => setN(e.target.value)} type="password" placeholder="كلمة المرور الجديدة (6 أحرف على الأقل)" className="w-full border border-slate-300 rounded-lg px-3 py-2.5 font-bold outline-none focus:border-slate-900" />
+      <button onClick={save} className="bg-slate-900 text-white font-bold px-6 py-2.5 rounded-lg">حفظ التغيير</button>
+      {msg && <div className="text-xs font-bold text-slate-700 bg-slate-100 border border-slate-200 rounded-lg px-3 py-2">{msg}</div>}
+    </div>
+  );
+}
