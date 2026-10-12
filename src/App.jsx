@@ -140,6 +140,10 @@ function Login({ onDone }) {
             ))}
           </div>
           <div className="text-[11px] text-slate-400 font-bold mt-6">الصفوف: الرابع — الخامس — الأول والثاني متوسط</div>
+          <div className="flex items-center gap-4 mt-5 pt-5 border-t border-white/10">
+            <img src="/logo-afaq.png" alt="وزارة الثقافة" className="h-8 object-contain brightness-0 invert" />
+            <img src="/logo-edu.png" alt="وزارة التعليم" className="h-8 object-contain brightness-0 invert" />
+          </div>
           </div>
         </div>
         <form onSubmit={submit} className="md:col-span-3 p-8 md:p-12 space-y-5">
@@ -165,7 +169,7 @@ function Login({ onDone }) {
               </button>
             </div>
           </div>
-          <button disabled={loading} className="w-full py-4 rounded-xl bg-[#004645] text-white font-black text-base hover:bg-[#013937] active:scale-[0.99] transition disabled:opacity-50 shadow-lg">{loading ? 'جاري التحقق...' : 'دخول'}</button>
+          <button disabled={loading} className="w-full py-4 rounded-full bg-[#004645] text-white font-black text-base hover:bg-[#013937] active:scale-[0.99] transition disabled:opacity-50 shadow-lg">{loading ? 'جاري التحقق...' : 'دخول'}</button>
         </form>
       </div>
     </div>
@@ -189,26 +193,28 @@ export default function App() {
   const myGrades = user.role === 'teacher' ? grades.filter(g => user.allowedGrades.includes(g.id)) : grades;
 
   return (
-    <div className="min-h-screen">
-      <header className="no-print bg-[#004645] text-white border-b-4 border-[#fbe122]">
-        <div className="max-w-6xl mx-auto px-4 md:px-6 py-4 flex flex-wrap items-center justify-between gap-3">
+    <div className="min-h-screen flex flex-col">
+      <header className="no-print bg-white shadow-sm sticky top-0 z-50">
+        <div className="max-w-6xl mx-auto px-4 md:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-white/10 border border-white/15 rounded-lg"><Palette className="w-5 h-5 text-[#fbe122]" /></div>
-            <div>
-              <h1 className="font-black text-base md:text-lg leading-tight">منظومة الحضور والغياب — أكاديمية آفاق للفنون والثقافة</h1>
-              <p className="text-[11px] text-slate-400 font-bold">الفنون البصرية — الأدائية — الموسيقى</p>
+            <img src="/logo-afaq.png" alt="وزارة الثقافة" className="h-11 object-contain" />
+            <img src="/logo-edu.png" alt="وزارة التعليم" className="h-11 object-contain" />
+            <div className="border-r border-slate-200 pr-3">
+              <h1 className="font-black text-sm md:text-base leading-tight text-slate-900">منظومة الحضور والغياب</h1>
+              <p className="text-[11px] text-slate-500 font-bold">أكاديمية آفاق للفنون والثقافة</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <span className={`text-[11px] font-black px-3 py-1 rounded-full ${roleStyle[user.role]}`}>{roleLabel[user.role]}</span>
-            <span className="text-xs font-bold text-slate-200">{user.displayName}</span>
-            <button onClick={() => { localStorage.removeItem('att_token'); location.reload(); }} className="no-print flex items-center gap-1.5 text-[11px] font-bold text-slate-300 hover:text-white border border-white/20 hover:border-white/40 px-3 py-1.5 rounded-lg transition"><LogOut className="w-3.5 h-3.5" />خروج</button>
+            <span className="text-xs font-bold text-slate-600">{user.displayName}</span>
+            <button onClick={() => { localStorage.removeItem('att_token'); location.reload(); }} className="no-print flex items-center gap-1.5 text-[11px] font-bold text-white bg-[#004645] hover:bg-[#013937] px-4 py-1.5 rounded-full transition"><LogOut className="w-3.5 h-3.5" />خروج</button>
           </div>
         </div>
+        <div className="h-1 bg-[#fbe122]" />
       </header>
 
-      <div className="max-w-6xl mx-auto px-4 md:px-6 py-5">
-        <nav className="no-print bg-white rounded-xl shadow-sm border border-slate-200 p-1.5 flex gap-1 overflow-x-auto mb-5">
+      <div className="max-w-6xl mx-auto px-4 md:px-6 py-5 flex-1 w-full">
+        <nav className="no-print bg-white rounded-full shadow-sm border border-slate-200 p-1.5 flex gap-1 overflow-x-auto mb-6 w-fit max-w-full">
           <NavBtn active={view === 'attendance'} onClick={() => setView('attendance')} icon={<ClipboardCheck className="w-4 h-4" />} label="تسجيل الحضور" />
           <NavBtn active={view === 'reports'} onClick={() => setView('reports')} icon={<BarChart3 className="w-4 h-4" />} label="التقارير" />
           {(user.role === 'admin' || user.role === 'supervisor') && <NavBtn active={view === 'students'} onClick={() => setView('students')} icon={<Users className="w-4 h-4" />} label="الطلاب" />}
@@ -224,10 +230,36 @@ export default function App() {
           {view === 'password' && <PasswordView />}
         </div>
       </div>
+      <SiteFooter />
     </div>
   );
 }
 
+function SectionTitle({ children, sub }) {
+  return (
+    <div className="no-print mb-4">
+      <h2 className="text-2xl font-black text-slate-900 relative inline-block">
+        {children}
+        <span className="absolute -bottom-1.5 right-0 w-2/3 h-1 bg-[#fbe122] rounded-full" />
+      </h2>
+      {sub && <p className="text-xs text-slate-500 font-bold mt-2.5">{sub}</p>}
+    </div>
+  );
+}
+
+function SiteFooter() {
+  return (
+    <footer className="no-print mt-10 border-t border-slate-200 bg-white">
+      <div className="max-w-6xl mx-auto px-4 md:px-6 py-5 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-5">
+          <img src="/logo-afaq.png" alt="وزارة الثقافة" className="h-10 object-contain" />
+          <img src="/logo-edu.png" alt="وزارة التعليم" className="h-10 object-contain" />
+        </div>
+        <div className="text-[11px] text-slate-400 font-bold text-center">منظومة الحضور والغياب — أكاديمية آفاق للفنون والثقافة — جميع الحقوق محفوظة</div>
+      </div>
+    </footer>
+  );
+}
 function NavBtn({ active, onClick, icon, label }) {
   return <button onClick={onClick} className={`flex items-center gap-1.5 text-xs font-bold px-4 py-2.5 rounded-lg transition whitespace-nowrap ${active ? 'bg-[#004645] text-white' : 'text-slate-500 hover:bg-slate-100'}`}>{icon}{label}</button>;
 }
@@ -325,17 +357,22 @@ function AttendanceView({ myTracks, myGrades }) {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="no-print grid md:grid-cols-3 gap-3">
+    <div className="space-y-5">
+      <SectionTitle sub="اختر المادة والصف والأسبوع لتسجيل حضور الطلاب">تسجيل الحضور الأسبوعي</SectionTitle>
+      <div className="no-print grid md:grid-cols-3 gap-5">
         {myTracks.map(t => {
           const c = trackStyle[t.id] || trackStyle.visual;
           const on = track === t.id;
           return (
-            <button key={t.id} onClick={() => setTrack(t.id)} className={`flex items-stretch gap-0 rounded-xl border text-right transition bg-white overflow-hidden ${on ? 'border-[#004645] shadow-md' : 'border-slate-200 hover:border-slate-400'}`}>
-              <img src={c.img} alt={t.name} className="w-20 object-cover shrink-0" loading="lazy" />
-              <span className={`flex-1 p-3 border-r-4 ${on ? 'border-[#fbe122]' : 'border-transparent'}`}>
-                <span className="flex items-center gap-2 font-black text-sm text-slate-900"><span className={`p-1.5 rounded-md border ${c.chip}`}>{c.icon}</span>{t.name}</span>
-              <span className="block text-[11px] font-bold text-slate-400 mt-1">{on ? 'المادة المحددة' : 'اضغط للتبديل'}</span></span>
+            <button key={t.id} onClick={() => setTrack(t.id)} className={`bg-white rounded-3xl overflow-hidden text-right transition border-2 ${on ? 'border-[#004645] shadow-lg' : 'border-transparent shadow-sm hover:shadow-md'}`}>
+              <div className="relative h-28">
+                <img src={c.img} alt={t.name} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+                {on && <span className="absolute top-2 left-2 text-[10px] font-black bg-[#fbe122] text-[#004645] px-2.5 py-1 rounded-full">المحددة</span>}
+              </div>
+              <div className="p-3.5 flex items-center gap-2.5">
+                <span className={`p-2 rounded-xl border ${c.chip}`}>{c.icon}</span>
+                <span className="font-black text-sm text-slate-900">{t.name}</span>
+              </div>
             </button>
           );
         })}
@@ -355,7 +392,7 @@ function AttendanceView({ myTracks, myGrades }) {
             {weekId !== currentWeekId && <button onClick={() => setWeekId(currentWeekId)} className="text-[10px] font-bold bg-[#004645] text-white px-2 py-1 rounded-md">الأسبوع الحالي</button>}
           </div>
           <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 flex-1 min-w-[160px]"><Search className="w-4 h-4 text-slate-400" /><input value={q} onChange={e => setQ(e.target.value)} placeholder="بحث باسم الطالب..." className="bg-transparent outline-none text-sm font-bold w-full" /></div>
-          <button onClick={save} disabled={saving || !dirtyCount} className="flex items-center gap-1.5 text-sm font-black text-white px-5 py-2 rounded-lg bg-[#004645] hover:bg-[#013937] transition disabled:opacity-40"><Save className="w-4 h-4" />{saving ? 'جاري الحفظ...' : `حفظ الأسبوع${dirtyCount ? ` (${dirtyCount})` : ''}`}</button>
+          <button onClick={save} disabled={saving || !dirtyCount} className="flex items-center gap-1.5 text-sm font-black text-white px-6 py-2 rounded-full bg-[#004645] hover:bg-[#013937] transition disabled:opacity-40"><Save className="w-4 h-4" />{saving ? 'جاري الحفظ...' : `حفظ الأسبوع${dirtyCount ? ` (${dirtyCount})` : ''}`}</button>
           <button onClick={() => window.print()} className="flex items-center gap-1.5 text-sm font-bold bg-[#004645] text-white px-4 py-2 rounded-lg hover:bg-[#013937]"><Printer className="w-4 h-4" />طباعة</button>
         </div>
         {msg && <div className="text-xs font-bold text-slate-700 bg-slate-100 border border-slate-200 rounded-lg px-3 py-2">{msg}</div>}
@@ -477,12 +514,13 @@ function ReportsView({ myTracks, myGrades, tracks, grades }) {
 
   return (
     <div className="space-y-4">
+      <SectionTitle sub="نسب الحضور والغياب لكل طالب حسب الفترة المحددة">تقارير الحضور</SectionTitle>
       <div className="no-print bg-white border border-slate-200 rounded-xl shadow-sm p-4 flex flex-wrap items-end gap-3">
         <label className="text-[11px] font-bold text-slate-500">من:<input type="date" value={from} onChange={e => setFrom(e.target.value)} className="block border border-slate-300 rounded-lg px-3 py-1.5 font-bold mt-1 text-slate-800" /></label>
         <label className="text-[11px] font-bold text-slate-500">إلى:<input type="date" value={to} onChange={e => setTo(e.target.value)} className="block border border-slate-300 rounded-lg px-3 py-1.5 font-bold mt-1 text-slate-800" /></label>
         <label className="text-[11px] font-bold text-slate-500">المادة:<select value={track} onChange={e => setTrack(e.target.value)} className="block border border-slate-300 rounded-lg px-3 py-1.5 font-bold mt-1 text-slate-800"><option value="">الكل</option>{myTracks.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}</select></label>
         <label className="text-[11px] font-bold text-slate-500">الصف:<select value={gradeId} onChange={e => setGradeId(e.target.value)} className="block border border-slate-300 rounded-lg px-3 py-1.5 font-bold mt-1 text-slate-800"><option value="">الكل</option>{myGrades.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}</select></label>
-        <button onClick={run} className="bg-[#004645] text-white text-sm font-bold px-6 py-2 rounded-lg">عرض التقرير</button>
+        <button onClick={run} className="bg-[#004645] text-white text-sm font-bold px-6 py-2 rounded-full">عرض التقرير</button>
         <button onClick={csv} className="flex items-center gap-1.5 bg-[#004645] text-white text-sm font-bold px-4 py-2 rounded-lg"><FileDown className="w-4 h-4" />تصدير CSV</button>
         <button onClick={() => window.print()} className="bg-white border border-slate-300 text-slate-700 text-sm font-bold px-4 py-2 rounded-lg">طباعة</button>
         {msg && <span className="text-[11px] font-bold text-slate-400">{msg}</span>}
@@ -564,6 +602,7 @@ function StudentsView({ grades, tracks }) {
   };
   return (
     <div className="space-y-4">
+      <SectionTitle sub="قائمة مستقلة لكل مادة وصف — 12 قائمة">إدارة الطلاب</SectionTitle>
       <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-4 space-y-3">
         <div className="flex flex-wrap gap-2">{tracks.map(t => <button key={t.id} onClick={() => setTrack(t.id)} className={`px-4 py-2 rounded-lg text-xs font-bold border transition ${track === t.id ? 'bg-[#004645] text-white border-[#004645]' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'}`}>{t.icon} {t.name}</button>)}</div>
         <div className="flex flex-wrap gap-2">{grades.map(g => <button key={g.id} onClick={() => setGradeId(g.id)} className={`px-4 py-2 rounded-lg text-xs font-bold border transition ${gradeId === g.id ? 'bg-[#004645] text-white border-[#004645]' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'}`}>{g.name} <span className="opacity-60">({list.length})</span></button>)}</div>
@@ -625,6 +664,7 @@ function UsersView({ tracks, grades, me }) {
   const resetPw = async (u) => { const p = prompt(`كلمة مرور جديدة لـ ${u.username} (6 أحرف على الأقل)`); if (!p) return; try { await api(`/api/auth/users/${u.id}`, { method: 'PATCH', body: { password: p } }); setMsg('تم تعيين كلمة المرور'); } catch (e) { setMsg(e.message); } };
   return (
     <div className="space-y-4">
+      <SectionTitle sub="إنشاء الحسابات وإسناد المواد والصفوف">المستخدمون والصلاحيات</SectionTitle>
       <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-5 space-y-3">
         <h3 className="font-black text-slate-900 flex items-center gap-2 text-sm"><UserCog className="w-5 h-5" />إنشاء حساب جديد</h3>
         <div className="grid md:grid-cols-4 gap-2">
@@ -669,12 +709,15 @@ function PasswordView() {
     catch (e) { setMsg(e.message); }
   };
   return (
+    <div className="space-y-4">
+      <SectionTitle sub="تغيير كلمة المرور الخاصة بك">كلمة المرور</SectionTitle>
     <div className="max-w-md bg-white border border-slate-200 rounded-xl shadow-sm p-6 space-y-3">
       <h3 className="font-black text-slate-900 flex items-center gap-2 text-sm"><KeyRound className="w-5 h-5" />تغيير كلمة المرور</h3>
       <input value={o} onChange={e => setO(e.target.value)} type="password" placeholder="كلمة المرور الحالية" className="w-full border border-slate-300 rounded-lg px-3 py-2.5 font-bold outline-none focus:border-[#004645]" />
       <input value={n} onChange={e => setN(e.target.value)} type="password" placeholder="كلمة المرور الجديدة (6 أحرف على الأقل)" className="w-full border border-slate-300 rounded-lg px-3 py-2.5 font-bold outline-none focus:border-[#004645]" />
       <button onClick={save} className="bg-[#004645] text-white font-bold px-6 py-2.5 rounded-lg">حفظ التغيير</button>
       {msg && <div className="text-xs font-bold text-slate-700 bg-slate-100 border border-slate-200 rounded-lg px-3 py-2">{msg}</div>}
+    </div>
     </div>
   );
 }
