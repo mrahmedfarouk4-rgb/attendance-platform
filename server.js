@@ -252,48 +252,63 @@ app.delete('/api/auth/users/:id', requireAuth, requireRole('admin', 'developer')
 app.get('/api/attendance/meta', requireAuth, (req, res) => res.json({ tracks: TRACKS, grades: GRADES, statuses: ATT_STATUSES, weeks: SEMESTER_SCHEDULE, user: sanitizeUser(req.user) }));
 app.get('/api/attendance/students', requireAuth, async (req, res) => {
   try {
-    const { gradeId } = req.query;
+    const { gradeId, track } = req.query;
     const where = { active: true };
     if (gradeId) {
       if (!GRADE_IDS.includes(String(gradeId))) return res.status(400).json({ error: 'صف غير صالح' });
       if (req.user.role === 'teacher' && !parseJsonArray(req.user.allowedGrades).includes(String(gradeId))) return res.status(403).json({ error: 'غير مصرح لهذا الصف' });
       where.gradeId = String(gradeId);
     } else if (req.user.role === 'teacher') where.gradeId = { in: parseJsonArray(req.user.allowedGrades) };
+    if (track) {
+      if (!TRACK_IDS.includes(String(track))) return res.status(400).json({ error: 'مادة غير صالحة' });
+      if (req.user.role === 'teacher' && !parseJsonArray(req.user.allowedTracks).includes(String(track))) return res.status(403).json({ error: 'غير مصرح لهذه المادة' });
+      where.track = String(track);
+    } else if (req.user.role === 'teacher') where.track = { in: parseJsonArray(req.user.allowedTracks) };
     res.json(await prisma.student.findMany({ where, orderBy: { name: 'asc' } }));
   } catch (e) { res.status(500).json({ error: 'خطأ داخلي', details: e.message }); }
 });
 app.post('/api/attendance/students', requireAuth, requireRole('admin', 'supervisor', 'developer'), async (req, res) => {
   try {
-    const { name, gradeId } = req.body || {};
+    const { name, gradeId, track } = req.body || {};
     if (!name || !gradeId) return res.status(400).json({ error: 'الاسم والصف مطلوبان' });
     if (!GRADE_IDS.includes(String(gradeId))) return res.status(400).json({ error: 'صف غير صالح' });
-    res.json(await prisma.student.create({ data: { name: String(name).trim(), gradeId: String(gradeId), active: true } }));
+    const tr = TRACK_IDS.includes(String(track)) ? String(track) : 'visual';
+    res.json(await prisma.student.create({ data: { name: String(name).trim(), gradeId: String(gradeId), track: tr, active: true } }));
   } catch (e) { res.status(500).json({ error: 'خطأ داخلي', details: e.message }); }
 });
 app.post('/api/attendance/students/bulk', requireAuth, requireRole('admin', 'supervisor', 'developer'), async (req, res) => {
   try {
-    const { gradeId, names } = req.body || {};
+    const { gradeId, track, names } = req.body || {};
     if (!gradeId || !Array.isArray(names)) return res.status(400).json({ error: 'gradeId و names مطلوبان' });
+    const tr = TRACK_IDS.includes(String(track)) ? String(track) : 'visual';
     const clean = [...new Set(names.map((n) => String(n).trim()).filter(Boolean))].slice(0, 500);
     if (!clean.length) return res.status(400).json({ error: 'لا أسماء صالحة' });
-    const existing = new Set((await prisma.student.findMany({ where: { gradeId: String(gradeId) } })).map((s) => s.name.trim()));
+    const existing = new Set((await prisma.student.findMany({ where: { gradeId: String(gradeId), track: tr } })).map((s) => s.name.trim()));
     const fresh = clean.filter((n) => !existing.has(n));
-    await prisma.student.createMany({ data: fresh.map((n) => ({ name: n, gradeId: String(gradeId), active: true })) });
+    await prisma.student.createMany({ data: fresh.map((n) => ({ name: n, gradeId: String(gradeId), track: tr, active: true })) });
     res.json({ added: fresh.length, skipped: clean.length - fresh.length });
   } catch (e) { res.status(500).json({ error: 'خطأ داخلي', details: e.message }); }
 });
 app.patch('/api/attendance/students/:id', requireAuth, requireRole('admin', 'supervisor', 'developer'), async (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    const { name, gradeId, active } = req.body || {};
+    const { name, gradeId, track, active, moveRecords } = req.body || {};
     const data = {};
     if (name !== undefined) data.name = String(name).trim();
     if (gradeId !== undefined) {
       if (!GRADE_IDS.includes(String(gradeId))) return res.status(400).json({ error: 'صف غير صالح' });
       data.gradeId = String(gradeId);
     }
+    if (track !== undefined) {
+      if (!TRACK_IDS.includes(String(track))) return res.status(400).json({ error: 'مادة غير صالحة' });
+      data.track = String(track);
+    }
     if (active !== undefined) data.active = !!active;
-    res.json(await prisma.student.update({ where: { id }, data }));
+    const updated = await prisma.student.update({ where: { id }, data });
+    if ((gradeId !== undefined || track !== undefined) && moveRecords) {
+      await prisma.attendanceRecord.updateMany({ where: { studentId: id }, data: { gradeId: updated.gradeId, track: updated.track } });
+    }
+    res.json(updated);
   } catch (e) { res.status(500).json({ error: 'خطأ داخلي', details: e.message }); }
 });
 app.delete('/api/attendance/students/:id', requireAuth, requireRole('admin', 'supervisor', 'developer'), async (req, res) => {
@@ -327,7 +342,7 @@ app.post('/api/attendance/records', requireAuth, async (req, res) => {
     const ops = [];
     for (const r of clean) {
       const st = byId.get(r.studentId);
-      if (!st || (st.gradeId && st.gradeId !== String(gradeId))) continue;
+      if (!st || st.gradeId !== String(gradeId) || (st.track && st.track !== String(track))) continue;
       ops.push(prisma.attendanceRecord.upsert({
         where: { date_track_gradeId_studentId: { date: String(date), track: String(track), gradeId: String(gradeId), studentId: r.studentId } },
         update: { status: r.status, note: r.note ? String(r.note).slice(0, 200) : null, markedById: req.user.id },
@@ -363,7 +378,7 @@ app.post('/api/attendance/week', requireAuth, async (req, res) => {
     const dedup = new Map();
     for (const r of clean) {
       const st = byId.get(r.studentId);
-      if (!st || (st.gradeId && st.gradeId !== String(gradeId))) continue;
+      if (!st || st.gradeId !== String(gradeId) || (st.track && st.track !== String(track))) continue;
       dedup.set(`${r.date}|${r.studentId}`, r);
     }
     const toDelete = [...dedup.values()].filter((r) => r.status === null);

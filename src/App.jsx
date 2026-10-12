@@ -197,7 +197,7 @@ export default function App() {
         <div className="animate-fade-up" key={view}>
           {view === 'attendance' && <AttendanceView myTracks={myTracks} myGrades={myGrades} />}
           {view === 'reports' && <ReportsView myTracks={myTracks} myGrades={myGrades} tracks={tracks} grades={grades} />}
-          {view === 'students' && <StudentsView grades={grades} />}
+          {view === 'students' && <StudentsView grades={grades} tracks={tracks} />}
           {view === 'users' && (user.role === 'admin' || user.role === 'developer') && <UsersView tracks={tracks} grades={grades} me={user} />}
           {view === 'password' && <PasswordView />}
         </div>
@@ -470,8 +470,10 @@ function ReportsView({ myTracks, myGrades, tracks, grades }) {
   );
 }
 
-// ---------- الطلاب ----------
-function StudentsView({ grades }) {
+// ---------- الطلاب (قائمة مستقلة لكل مادة × صف) ----------
+function StudentsView({ grades, tracks }) {
+  const trackName = (id) => tracks.find(t => t.id === id)?.name || id;
+  const [track, setTrack] = useState('visual');
   const [gradeId, setGradeId] = useState('grade4');
   const [list, setList] = useState([]);
   const [name, setName] = useState('');
@@ -479,18 +481,19 @@ function StudentsView({ grades }) {
   const [msg, setMsg] = useState('');
   const [fileMsg, setFileMsg] = useState('');
   const [fileBusy, setFileBusy] = useState(false);
-  const load = async (g = gradeId) => {
-    try { setList(await api(`/api/attendance/students?gradeId=${g}`)); } catch (e) { setMsg(e.message); }
+  const [editing, setEditing] = useState(null); // {id,name,track,gradeId,moveRecords}
+  const load = async (t = track, g = gradeId) => {
+    try { setList(await api(`/api/attendance/students?gradeId=${g}&track=${t}`)); } catch (e) { setMsg(e.message); }
   };
-  useEffect(() => { load(); }, [gradeId]);
+  useEffect(() => { load(); }, [track, gradeId]);
   const add = async () => {
     if (!name.trim()) return;
-    try { await api('/api/attendance/students', { method: 'POST', body: { name: name.trim(), gradeId } }); setName(''); load(); } catch (e) { setMsg(e.message); }
+    try { await api('/api/attendance/students', { method: 'POST', body: { name: name.trim(), gradeId, track } }); setName(''); load(); } catch (e) { setMsg(e.message); }
   };
   const addBulk = async () => {
     const names = bulk.split('\n').map(s => s.trim()).filter(Boolean);
     if (!names.length) return;
-    try { const r = await api('/api/attendance/students/bulk', { method: 'POST', body: { gradeId, names } }); setMsg(`تمت إضافة ${r.added} — مكرر: ${r.skipped}`); setBulk(''); load(); } catch (e) { setMsg(e.message); }
+    try { const r = await api('/api/attendance/students/bulk', { method: 'POST', body: { gradeId, track, names } }); setMsg(`تمت إضافة ${r.added} — مكرر: ${r.skipped}`); setBulk(''); load(); } catch (e) { setMsg(e.message); }
   };
   const importFile = async (e) => {
     const f = e.target.files?.[0];
@@ -500,11 +503,18 @@ function StudentsView({ grades }) {
     try {
       const names = parseNamesFile(await f.text());
       if (!names.length) throw new Error('لم يتم العثور على أسماء في الملف');
-      const r = await api('/api/attendance/students/bulk', { method: 'POST', body: { gradeId, names } });
+      const r = await api('/api/attendance/students/bulk', { method: 'POST', body: { gradeId, track, names } });
       setFileMsg(`تم الاستيراد — جديد: ${r.added} — مكرر: ${r.skipped} (من ${names.length} اسم)`);
       load();
     } catch (err) { setFileMsg(err.message); }
     finally { setFileBusy(false); }
+  };
+  const saveEdit = async () => {
+    if (!editing || !editing.name.trim()) return;
+    try {
+      await api(`/api/attendance/students/${editing.id}`, { method: 'PATCH', body: { name: editing.name.trim(), track: editing.track, gradeId: editing.gradeId, moveRecords: editing.moveRecords } });
+      setEditing(null); load();
+    } catch (e) { setMsg(e.message); }
   };
   const del = async (id) => {
     if (!confirm('حذف الطالب وسجلات حضوره نهائياً؟')) return;
@@ -513,18 +523,43 @@ function StudentsView({ grades }) {
   return (
     <div className="space-y-4">
       <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-4 space-y-3">
+        <div className="flex flex-wrap gap-2">{tracks.map(t => <button key={t.id} onClick={() => setTrack(t.id)} className={`px-4 py-2 rounded-lg text-xs font-bold border transition ${track === t.id ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'}`}>{t.icon} {t.name}</button>)}</div>
         <div className="flex flex-wrap gap-2">{grades.map(g => <button key={g.id} onClick={() => setGradeId(g.id)} className={`px-4 py-2 rounded-lg text-xs font-bold border transition ${gradeId === g.id ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'}`}>{g.name} <span className="opacity-60">({list.length})</span></button>)}</div>
+        <div className="text-[11px] font-bold text-slate-500">القائمة الحالية: {trackName(track)} — {grades.find(g => g.id === gradeId)?.name} ({list.length} طالب)</div>
         <div className="flex gap-2"><input value={name} onChange={e => setName(e.target.value)} onKeyDown={e => e.key === 'Enter' && add()} placeholder="اسم طالب جديد..." className="flex-1 border border-slate-300 rounded-lg px-3 py-2 font-bold outline-none focus:border-slate-900" /><button onClick={add} className="flex items-center gap-1 bg-slate-900 text-white text-sm font-bold px-5 py-2 rounded-lg"><Plus className="w-4 h-4" />إضافة</button></div>
         <div className="flex gap-2"><textarea value={bulk} onChange={e => setBulk(e.target.value)} rows={3} placeholder="لصق جماعي — كل اسم في سطر مستقل" className="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm font-bold outline-none focus:border-slate-900" /><button onClick={addBulk} className="bg-emerald-700 text-white text-sm font-bold px-5 py-2 rounded-lg h-fit">لصق جماعي</button></div>
         <div className="flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
           <label className={`flex items-center gap-1.5 text-xs font-bold px-4 py-2 rounded-lg cursor-pointer transition border ${fileBusy ? 'bg-slate-100 text-slate-400 border-slate-200' : 'bg-white text-slate-700 border-slate-300 hover:border-slate-900'}`}><FileUp className="w-4 h-4" />{fileBusy ? 'جاري الاستيراد...' : 'استيراد ملف (CSV / JSON)'}<input type="file" accept=".json,.csv,.txt" className="hidden" onChange={importFile} disabled={fileBusy} /></label>
-          <span className="text-[11px] text-slate-400 font-bold">ملف بأسماء الطلاب — كل اسم في سطر، إلى الصف الحالي</span>
+          <span className="text-[11px] text-slate-400 font-bold">إلى القائمة الحالية فقط</span>
         </div>
         {(fileMsg || msg) && <div className="text-xs font-bold text-slate-700 bg-slate-100 border border-slate-200 rounded-lg px-3 py-2">{fileMsg || msg}</div>}
       </div>
       <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-        {list.map((s, i) => <div key={s.id} className="flex items-center justify-between border-t first:border-0 border-slate-100 px-4 py-2.5 hover:bg-slate-50"><span className="font-bold text-sm flex items-center gap-2.5 text-slate-800"><span className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-sm ${avatarTones[s.id % avatarTones.length]}`}>{s.name.trim()[0]}</span>{i + 1}. {s.name}</span><button onClick={() => del(s.id)} className="text-rose-600 hover:bg-rose-50 p-2 rounded-lg transition"><Trash2 className="w-4 h-4" /></button></div>)}
-        {!list.length && <div className="p-10 text-center text-slate-400 font-bold">لا يوجد طلاب بعد</div>}
+        {list.map((s, i) => (
+          <div key={s.id} className="border-t first:border-0 border-slate-100 px-4 py-2.5 hover:bg-slate-50">
+            {editing?.id === s.id ? (
+              <div className="space-y-2">
+                <input value={editing.name} onChange={e => setEditing({ ...editing, name: e.target.value })} className="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-sm font-bold outline-none focus:border-slate-900" />
+                <div className="flex flex-wrap items-center gap-2">
+                  <select value={editing.track} onChange={e => setEditing({ ...editing, track: e.target.value })} className="border border-slate-300 rounded-lg px-2 py-1.5 text-xs font-bold">{tracks.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}</select>
+                  <select value={editing.gradeId} onChange={e => setEditing({ ...editing, gradeId: e.target.value })} className="border border-slate-300 rounded-lg px-2 py-1.5 text-xs font-bold">{grades.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}</select>
+                  <label className="flex items-center gap-1 text-[11px] font-bold text-slate-600"><input type="checkbox" checked={editing.moveRecords} onChange={e => setEditing({ ...editing, moveRecords: e.target.checked })} className="accent-slate-900" />نقل سجلات حضوره معه</label>
+                  <button onClick={saveEdit} className="text-xs font-bold bg-slate-900 text-white px-3 py-1.5 rounded-lg">حفظ</button>
+                  <button onClick={() => setEditing(null)} className="text-xs font-bold bg-slate-100 px-3 py-1.5 rounded-lg">إلغاء</button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-sm flex items-center gap-2.5 text-slate-800"><span className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-sm ${avatarTones[s.id % avatarTones.length]}`}>{s.name.trim()[0]}</span>{i + 1}. {s.name}</span>
+                <span className="flex gap-1">
+                  <button onClick={() => setEditing({ id: s.id, name: s.name, track: s.track || track, gradeId: s.gradeId || gradeId, moveRecords: true })} className="text-xs font-bold text-slate-600 hover:bg-slate-100 px-3 py-1.5 rounded-lg">تعديل / نقل</button>
+                  <button onClick={() => del(s.id)} className="text-rose-600 hover:bg-rose-50 p-2 rounded-lg transition"><Trash2 className="w-4 h-4" /></button>
+                </span>
+              </div>
+            )}
+          </div>
+        ))}
+        {!list.length && <div className="p-10 text-center text-slate-400 font-bold">لا يوجد طلاب في هذه القائمة بعد</div>}
       </div>
     </div>
   );
