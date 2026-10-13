@@ -1,7 +1,8 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Alexandria", "Cairo", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Cairo", ui-sans-serif, system-ui, sans-serif;
+  --font-head: "Alexandria", "Cairo", ui-sans-serif, system-ui, sans-serif;
 }
 
 @layer base {
@@ -9,9 +10,12 @@
     direction: rtl;
     font-family: var(--font-sans);
   }
+  h1, h2, thead {
+    font-family: var(--font-head);
+  }
   body {
     background-color: #f4f5f3;
-    background-image: linear-gradient(rgba(244, 245, 243, 0.94), rgba(244, 245, 243, 0.97)), url(/hero-bg.jpg);
+    background-image: linear-gradient(rgba(251, 251, 250, 0.62), rgba(251, 251, 250, 0.70)), url(/gallery/bg-main.jpg);
     background-size: cover;
     background-position: center top;
     background-attachment: fixed;

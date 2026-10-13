@@ -117,10 +117,10 @@ function Login({ onDone }) {
   };
   return (
     <div className="min-h-screen relative flex flex-col items-center justify-center px-4 py-10 overflow-hidden" style={{ backgroundImage: 'url(/gallery/school-gate.jpg)', backgroundSize: 'cover', backgroundPosition: 'center top' }}>
-      <div className="absolute inset-0 bg-[#621244]/80" />
+      <div className="absolute inset-0 bg-[#621244]/65" />
       <div className="relative w-full max-w-md text-center animate-fade-up">
-        <img src="/hero-logo.png" alt="أكاديمية آفاق للفنون والثقافة" className="mx-auto w-56" />
-        <h1 className="text-3xl font-black text-white mt-5">
+        <img src="/hero-logo.png" alt="أكاديمية آفاق للفنون والثقافة" className="mx-auto w-40" />
+        <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white mt-4" style={{ fontFamily: "'Cairo', sans-serif" }}>
           <span className="relative inline-block">
             منظومة الحضور والغياب
             <span className="absolute -bottom-1.5 right-0 w-full h-1 bg-[#fbe122] rounded-full" />
@@ -220,7 +220,7 @@ export default function App() {
 function SectionTitle({ children, sub }) {
   return (
     <div className="no-print mb-4">
-      <h2 className="text-2xl font-black text-slate-900 relative inline-block">
+      <h2 className="text-2xl md:text-3xl font-black tracking-tight text-slate-900 relative inline-block">
         {children}
         <span className="absolute -bottom-1.5 right-0 w-2/3 h-1 bg-[#fbe122] rounded-full" />
       </h2>
@@ -233,10 +233,10 @@ function PageHero({ img, title, sub, color }) {
   return (
     <div className="no-print relative overflow-hidden rounded-3xl shadow-md">
       <img src={img} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-      <div className="absolute inset-0 opacity-[0.85]" style={{ backgroundColor: color || '#621244' }} />
+      <div className="absolute inset-0 opacity-[0.55]" style={{ backgroundColor: color || '#621244' }} />
       <div className="relative px-6 py-7 md:px-10 flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl md:text-2xl font-black text-white">
+          <h2 className="text-xl md:text-2xl font-black tracking-tight text-white drop-shadow">
             <span className="relative inline-block">
               {title}
               <span className="absolute -bottom-1.5 right-0 w-2/3 h-1 bg-[#fbe122] rounded-full" />
@@ -244,7 +244,7 @@ function PageHero({ img, title, sub, color }) {
           </h2>
           {sub && <p className="text-sm text-white/80 font-bold mt-3">{sub}</p>}
         </div>
-        <img src="/hero-logo.png" alt="أكاديمية آفاق" className="hidden md:block h-16 object-contain" />
+        <img src="/hero-logo.png" alt="أكاديمية آفاق" className="hidden md:block h-20 object-contain bg-white/10 rounded-2xl px-4 py-2 backdrop-blur-sm shrink-0" />
       </div>
     </div>
   );
@@ -301,7 +301,7 @@ function AttendanceView({ myTracks, myGrades }) {
     if (!track || !gradeId || !weekId) return;
     setLoading(true); setMsg('');
     try {
-      const st = await api(`/api/attendance/students?gradeId=${gradeId}`);
+      const st = await api(`/api/attendance/students?gradeId=${gradeId}&track=${track}`);
       setStudents(st);
       const wk = await api(`/api/attendance/week?weekId=${weekId}&track=${track}&gradeId=${gradeId}`);
       setDates(wk.dates);
@@ -366,30 +366,30 @@ function AttendanceView({ myTracks, myGrades }) {
     <div className="space-y-5" style={themeVars}>
       <div className="no-print relative overflow-hidden rounded-3xl shadow-md">
         <img src="/hero-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
-        <div className="absolute inset-0 opacity-[0.88]" style={{ backgroundColor: 'var(--track)' }} />
-        <div className="relative px-6 py-6 md:px-8 flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+        <div className="absolute inset-0 opacity-[0.55]" style={{ backgroundColor: 'var(--track)' }} />
+        <div className="relative px-6 py-8 md:px-10 md:py-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div>
-            <div className="text-[11px] font-black text-[#fbe122] tracking-wide">منظومة الحضور والغياب — أكاديمية آفاق للفنون والثقافة</div>
-            <h2 className="text-2xl md:text-3xl font-black text-white mt-1.5">
-              <span className="relative inline-block">
+            <div className="text-xs font-black text-[#fbe122] tracking-widest drop-shadow-md">منظومة الحضور والغياب — أكاديمية آفاق للفنون والثقافة</div>
+            <h2 className="text-xl md:text-3xl font-extrabold tracking-tight text-white mt-2 drop-shadow-lg" style={{ fontFamily: "'Cairo', sans-serif" }}>
+              <span className="relative inline-block pb-2">
                 {myTracks.find(t => t.id === track)?.name}
-                <span className="absolute -bottom-1.5 right-0 w-2/3 h-1 bg-[#fbe122] rounded-full" />
+                <span className="absolute -bottom-0.5 right-0 w-2/3 h-1.5 bg-[#fbe122] rounded-full" />
               </span>
             </h2>
-            <p className="text-sm text-white/85 font-bold mt-3">{myGrades.find(g => g.id === gradeId)?.name} — {SEMESTER_SCHEDULE.find(w => w.id === weekId)?.label} <span dir="ltr" className="text-white/60">({dates.length ? `${shortDM(dates[0])} - ${shortDM(dates[4])}` : ''})</span></p>
+            <p className="text-xs md:text-sm text-white/85 font-bold mt-2.5 drop-shadow" style={{ fontFamily: "'Cairo', sans-serif" }}>{myGrades.find(g => g.id === gradeId)?.name} — {SEMESTER_SCHEDULE.find(w => w.id === weekId)?.label} <span dir="ltr" className="text-white/70">({dates.length ? `${shortDM(dates[0])} - ${shortDM(dates[4])}` : ''})</span></p>
           </div>
-          <div className="flex gap-2.5">
-            <div className="bg-white/10 border border-white/20 backdrop-blur rounded-2xl px-5 py-3 text-center min-w-[92px]">
-              <div className="text-2xl font-black text-white">{stats.total}</div>
-              <div className="text-[11px] font-bold text-white/75 mt-0.5">طلاب الصف</div>
+          <div className="flex gap-3">
+            <div className="bg-white/10 border border-white/25 backdrop-blur rounded-2xl px-6 py-4 text-center min-w-[104px]">
+              <div className="text-xl md:text-2xl font-extrabold text-white drop-shadow">{stats.total}</div>
+              <div className="text-xs font-black text-white/80 mt-1">طلاب الصف</div>
             </div>
-            <div className="bg-white/10 border border-white/20 backdrop-blur rounded-2xl px-5 py-3 text-center min-w-[92px]">
-              <div className="text-2xl font-black text-[#fbe122]">{stats.present}</div>
-              <div className="text-[11px] font-bold text-white/75 mt-0.5">حضور الأسبوع</div>
+            <div className="bg-white/10 border border-white/25 backdrop-blur rounded-2xl px-6 py-4 text-center min-w-[104px]">
+              <div className="text-xl md:text-2xl font-extrabold text-[#fbe122] drop-shadow">{stats.present}</div>
+              <div className="text-xs font-black text-white/80 mt-1">حضور الأسبوع</div>
             </div>
-            <div className="bg-white/10 border border-white/20 backdrop-blur rounded-2xl px-5 py-3 text-center min-w-[92px]">
-              <div className="text-2xl font-black text-white">{stats.absent}</div>
-              <div className="text-[11px] font-bold text-white/75 mt-0.5">غياب الأسبوع</div>
+            <div className="bg-white/10 border border-white/25 backdrop-blur rounded-2xl px-6 py-4 text-center min-w-[104px]">
+              <div className="text-xl md:text-2xl font-extrabold text-white drop-shadow">{stats.absent}</div>
+              <div className="text-xs font-black text-white/80 mt-1">غياب الأسبوع</div>
             </div>
           </div>
         </div>
@@ -451,7 +451,7 @@ function AttendanceView({ myTracks, myGrades }) {
                 <th className="p-2 w-10">#</th>
                 <th className="p-2 text-right min-w-[150px]">اسم الطالب</th>
                 {dates.map((d, i) => (
-                  <th key={d} className="p-2 border-r border-slate-100">
+                  <th key={d} className="p-2 border-r border-slate-100" style={{ backgroundColor: 'color-mix(in srgb, var(--track) 7%, white)' }}>
                     <div className="flex flex-col items-center gap-0.5">
                       <span className="font-bold text-[var(--track)]">{DAY_NAMES[i]}</span>
                       <span dir="ltr" className="text-[10px] font-bold text-slate-500">{shortDM(d)}</span>
@@ -491,18 +491,8 @@ function AttendanceView({ myTracks, myGrades }) {
           <span className="bg-white border border-slate-200 px-3 py-1 rounded-md">الطلاب: {stats.total}</span>
           {dirtyCount > 0 && <span className="no-print bg-amber-50 text-amber-800 border border-amber-300 px-3 py-1 rounded-md">تغييرات غير محفوظة: {dirtyCount}</span>}
         </div>
-        <div className="hidden print:block px-6 pb-5 pt-3">
-          <div className="flex justify-between gap-8">
-            <div className="flex-1 rounded-lg px-4 py-3 text-center print-sign">
-              <div className="text-xs font-black">معلم المادة</div>
-              <div className="mt-7 text-[11px] font-bold">الاسم والتوقيع: ............................</div>
-            </div>
-            <div className="flex-1 rounded-lg px-4 py-3 text-center print-sign">
-              <div className="text-xs font-black">إدارة المدرسة</div>
-              <div className="mt-7 text-[11px] font-bold">الختم والتوقيع: ............................</div>
-            </div>
-          </div>
-          <div className="text-center text-[10px] font-bold print-foot mt-3">طُبع بتاريخ <span dir="ltr">{todayStr()}</span> — أكاديمية آفاق للفنون والثقافة</div>
+        <div className="hidden print:block px-6 pb-5 pt-2">
+          <div className="text-center text-[10px] font-bold print-foot mt-1">طُبع بتاريخ <span dir="ltr">{todayStr()}</span> — أكاديمية آفاق للفنون والثقافة</div>
         </div>
       </div>
     </div>
