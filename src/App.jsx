@@ -378,7 +378,7 @@ function AttendanceView({ myTracks, myGrades }) {
             </h2>
             <p className="text-xs md:text-sm text-white/85 font-bold mt-2.5 drop-shadow" style={{ fontFamily: "'Cairo', sans-serif" }}>{myGrades.find(g => g.id === gradeId)?.name} — {SEMESTER_SCHEDULE.find(w => w.id === weekId)?.label} <span dir="ltr" className="text-white/70">({dates.length ? `${shortDM(dates[0])} - ${shortDM(dates[4])}` : ''})</span></p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-2 md:gap-3">
             <div className="bg-white/10 border border-white/25 backdrop-blur rounded-2xl px-6 py-4 text-center min-w-[104px]">
               <div className="text-xl md:text-2xl font-extrabold text-white drop-shadow">{stats.total}</div>
               <div className="text-xs font-black text-white/80 mt-1">طلاب الصف</div>
@@ -445,8 +445,8 @@ function AttendanceView({ myTracks, myGrades }) {
           </div>
         </div>
         {loading ? <div className="p-10 text-center font-bold text-slate-400">جاري تحميل الكشف...</div> : (
-          <table className="att-table w-full text-sm min-w-[760px]">
-            <thead>
+          <table className="att-table w-full text-xs md:text-sm min-w-[720px]">
+            <thead className="print:static">
               <tr className="text-[11px] text-slate-500 bg-slate-50 border-b border-slate-200">
                 <th className="p-2 w-10">#</th>
                 <th className="p-2 text-right min-w-[150px]">اسم الطالب</th>
@@ -465,7 +465,7 @@ function AttendanceView({ myTracks, myGrades }) {
               {filtered.map((s, i) => (
                 <tr key={s.id} className="border-t border-slate-100 hover:bg-slate-50 transition att-row">
                   <td className="p-2 text-center font-bold text-slate-300">{i + 1}</td>
-                  <td className="p-2"><span className="flex items-center gap-2"><span className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-sm shrink-0 print-avatar ${avatarTones[s.id % avatarTones.length]}`}>{s.name.trim()[0]}</span><span className="font-bold text-slate-800">{s.name}</span></span></td>
+                  <td className="p-2 sticky right-0 bg-white z-10 print:static"><span className="flex items-center gap-2"><span className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-sm shrink-0 print-avatar ${avatarTones[s.id % avatarTones.length]}`}>{s.name.trim()[0]}</span><span className="font-bold text-slate-800">{s.name}</span></span></td>
                   {dates.map(d => {
                     const cur = grid[`${s.id}|${d}`];
                     return (
